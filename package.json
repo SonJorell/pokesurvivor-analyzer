@@ -1,0 +1,20 @@
+{
+  "name": "pokesurvivor-character-analyzer",
+  "version": "1.0.0",
+  "description": "Herramienta analítica y compendio de personajes de PokéSurvivor con estética Pokémon Mundo Misterioso",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y serve .",
+    "dev": "npx -y serve ."
+  },
+  "keywords": [
+    "pokemon",
+    "pokesurvivor",
+    "analyzer",
+    "pmd",
+    "mystery-dungeon",
+    "stats"
+  ],
+  "author": "SonJorell",
+  "license": "MIT"
+}

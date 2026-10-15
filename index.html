@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PokéSurvivor Character Analyzer — Compendio & Estrategia 100% Verificada</title>
+  <meta name="description"
+    content="Dashboard de métricas globales, compendio de personajes y comparador táctico para los 966 Pokémon de PokéSurvivor usando datos 100% verificados del motor de juego.">
+  <meta name="theme-color" content="#0a1430">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/icons/icon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/icon-96.png">
+
+  <!-- Estilos del Analizador y Landing Page -->
+  <link rel="stylesheet" href="css/character-analyzer.css">
+  <link rel="stylesheet" href="css/landing.css">
+</head>
+
+<body>
+
+  <!-- ==================== Video de Fondo Dinámico (Ambient & Hero) ==================== -->
+  <div class="video-bg-container" id="video-bg-container">
+    <video id="bg-video" class="bg-video" autoplay loop muted playsinline preload="auto">
+      <source src="assets/Fondo_Oscuro.mp4" type="video/mp4">
+    </video>
+    <div class="video-bg-overlay"></div>
+  </div>
+
+  <!-- ==================== Capa Sutil de Partículas Ecosistema ==================== -->
+  <canvas id="dungeon-bg-canvas" class="dungeon-bg-canvas"></canvas>
+
+  <!-- ==================== Barra de Navegación Principal (Tabs) ==================== -->
+  <header class="landing-header">
+    <a href="#home" class="brand-group" onclick="Analyzer.App.switchTab('home')">
+      <img src="assets/icons/icon-48.png" alt="PokéSurvivor" class="brand-icon">
+      <div>
+        <div class="brand-text-title">PokéSurvivor Analyzer</div>
+        <div class="brand-text-badge">Compendio & Métricas Oficiales</div>
+      </div>
+    </a>
+
+    <!-- Selector de Pestañas Principales -->
+    <nav class="nav-links">
+      <button class="nav-tab-btn active" data-tab="home" onclick="Analyzer.App.switchTab('home')">
+        <span>🏠 Inicio & Dashboard</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="catalog" onclick="Analyzer.App.switchTab('catalog')">
+        <span>🗂 Catálogo (966)</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="comparison" onclick="Analyzer.App.switchTab('comparison')">
+        <span>⚔️ Comparador</span>
+        <span class="nav-badge" id="nav-compare-count" style="display:none">0</span>
+      </button>
+
+      <!-- Selector de Tema / Fondo de Video (Claro / Oscuro) -->
+      <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" aria-label="Cambiar tema de fondo"
+        title="Alternar entre Fondo Oscuro y Fondo Claro">
+        <span class="theme-toggle-icon">🌙</span>
+        <span class="theme-toggle-text">Fondo Oscuro</span>
+      </button>
+
+      <a href="https://pokesurvivor.com" target="_blank" rel="noopener" class="nav-cta-btn">
+        <span>🎮 Jugar PokéSurvivor</span>
+      </a>
+    </nav>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- VISTA 1: INICIO, HERO & DASHBOARD DE MÉTRICAS GLOBALES                     -->
+  <!-- ========================================================================= -->
+  <div class="app-view-panel active" id="view-home">
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+      <!-- Video de fondo a pantalla completa (solo Hero, sin audio) -->
+      <video id="hero-showcase-video" class="hero-fullscreen-video" autoplay loop muted playsinline preload="auto"
+        aria-hidden="true">
+        <source src="assets/Fondo_Oscuro.mp4" type="video/mp4">
+      </video>
+      <div class="hero-video-scrim"></div>
+      <div class="hero-glow-orb"></div>
+      <div class="hero-content">
+
+
+
+        <h1 class="hero-title">
+          Descubre el Potencial Oculto de Cada Pokémon en <span class="hero-title-highlight">PokéSurvivor</span>
+        </h1>
+        <p class="hero-description">
+          Herramienta analítica completa y transparente. Examina estadísticas reales del motor de combate,
+          fórmulas matemáticas de rendimiento, animaciones pixel-art en 8 direcciones y compara escuadras
+          para dominar las hordas y grietas dimensionales.
+        </p>
+
+        <div class="hero-actions">
+          <button class="hero-btn hero-btn-primary" onclick="Analyzer.App.switchTab('catalog')">
+            <span>🔍 Explorar Catálogo (966)</span>
+          </button>
+
+        </div>
+
+        <!-- Barra Resumen en Hero -->
+        <div class="hero-stats-bar">
+          <div class="hero-stat-card">
+            <div class="hero-stat-num">966</div>
+            <div class="hero-stat-label">Pokémon Verificados</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-num">9</div>
+            <div class="hero-stat-label">Regiones Completas</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-num">64</div>
+            <div class="hero-stat-label">Movimientos y Evoluciones</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-num">100%</div>
+            <div class="hero-stat-label">Datos de Motor Verificados</div>
+          </div>
+        </div>
+      </div><!-- /hero-content -->
+    </section>
+
+    <!-- Características de la Plataforma -->
+    <section class="features-section" id="features">
+      <div class="section-header">
+        <span class="section-tag">Herramientas Analíticas</span>
+        <h2 class="section-title">Diseñado para la Maestría en Combate</h2>
+        <p class="section-subtitle">
+          Inspirado en la estética clásica de Pokémon Mundo Misterioso para ofrecer la mejor experiencia táctica.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrap">📊</div>
+          <h3 class="feature-title">Fórmulas Analíticas Propias</h3>
+          <p class="feature-desc">
+            Evaluamos Daño Ofensivo, Supervivencia, Movilidad, Control y Rendimiento vs Jefes mediante fórmulas
+            matemáticas transparentes basadas en variables reales del motor.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrap">⚔️</div>
+          <h3 class="feature-title">Comparador Multificha</h3>
+          <p class="feature-desc">
+            Contrasta de 2 a 4 Pokémon simultáneamente con gráficos de radar, efectividades suavizadas de tipos,
+            hitboxes y compatibilidad con mejoras de tienda.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🔍</div>
+          <h3 class="feature-title">Buscador y Filtros Multifacéticos</h3>
+          <p class="feature-desc">
+            Filtra por generación, tipo elemental, roles de combate salvaje (embestidores, a distancia, tanques), o
+            establece umbrales mínimos de HP, ATK y velocidad.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrap">✨</div>
+          <h3 class="feature-title">Animaciones y Sprites PMD</h3>
+          <p class="feature-desc">
+            Visualiza animaciones de caminar, atacar, disparar y recibir daño en las 8 direcciones con soporte para
+            variantes Shiny y tamaño de sombra.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contenedor del Sugeridor Táctico de Equipos (Renderizado por Analyzer.TeamSuggester) -->
+    <div class="dashboard-container" id="team-suggester-container">
+      <!-- Rellenado dinámicamente con equipos para 1, 2, 3 o 4 jugadores -->
+    </div>
+
+    <!-- Contenedor del Dashboard Dinámico de Métricas (Renderizado por Analyzer.Dashboard) -->
+    <div class="dashboard-container" id="dashboard-container">
+      <!-- Rellenado dinámicamente con KPIs, Rankings Top 5 y Comparativa Regional -->
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VISTA 2: CATÁLOGO DE PERSONAJES, BUSCADOR Y FILTROS                      -->
+  <!-- ========================================================================= -->
+  <div class="app-view-panel" id="view-catalog">
+    <main class="analyzer-container">
+
+      <!-- Banner Informativo -->
+      <section class="pmd-box intro-banner">
+        <div class="pmd-box-title">
+          <span>Catálogo General de Personajes</span>
+          <span class="gold" style="font-size:15px">966 Pokémon · 9 Regiones</span>
+        </div>
+        <p class="lead" style="margin:0 0 10px; font-size:16px; color:#eaf1ff">
+          Usa los filtros multifacéticos para explorar cualquier personaje del juego.
+          Haz clic en cualquier tarjeta para abrir su <b>Ficha Completa (Dossier)</b> con animaciones interactivas,
+          o pulsa <b>+ Comparar</b> para añadirlo a tu escuadra.
+        </p>
+      </section>
+
+      <!-- Buscador y Filtros -->
+      <section class="pmd-box" id="search-filter-box">
+        <div class="pmd-box-title">
+          <span>Buscador y Filtros Multifacéticos</span>
+          <button class="btn small" id="reset-filters-btn">Limpiar Todos los Filtros</button>
+        </div>
+
+        <div class="search-filter-section">
+          <!-- Fila 1: Campo de Texto y Ordenación -->
+          <div class="search-primary-row">
+            <div class="search-input-wrap">
+              <span class="search-icon-inside">🔍</span>
+              <input type="text" id="search-input" class="search-input"
+                placeholder="Buscar por nombre, número Dex (ej: 025), tipo o movimiento..." autocomplete="off">
+            </div>
+
+            <div class="sort-controls">
+              <label for="sort-by" style="font-size:14px; color:var(--muted)">Ordenar por:</label>
+              <select id="sort-by" class="field">
+                <option value="dex">Nº Pokédex</option>
+                <option value="name">Nombre (A-Z)</option>
+                <option value="atk">Ataque (ATK)</option>
+                <option value="spd">Velocidad (SPD)</option>
+                <option value="hp">Salud (HP)</option>
+                <option value="bst">Total Base (BST)</option>
+                <option value="rarity">Rareza Gacha</option>
+                <option value="performance">Rendimiento Global</option>
+                <option value="offensive">Daño Ofensivo</option>
+                <option value="survival">Supervivencia</option>
+                <option value="mobility">Movilidad</option>
+              </select>
+
+              <button class="btn small" id="sort-dir" title="Cambiar dirección de orden">▲ Asc</button>
+            </div>
+          </div>
+
+          <!-- Fila de Orden Rápido por Estadísticas -->
+          <div class="quick-sort-row">
+            <span class="quick-sort-label">⚡ Orden Rápido:</span>
+            <div class="quick-sort-buttons" id="quick-sort-buttons">
+              <button class="quick-sort-btn" data-sort="atk" title="Ordenar por Ataque">
+                <span class="btn-icon">⚔️</span> ATK <span class="sort-indicator"></span>
+              </button>
+              <button class="quick-sort-btn" data-sort="spd" title="Ordenar por Velocidad">
+                <span class="btn-icon">⚡</span> SPD <span class="sort-indicator"></span>
+              </button>
+              <button class="quick-sort-btn" data-sort="hp" title="Ordenar por Salud">
+                <span class="btn-icon">❤️</span> HP <span class="sort-indicator"></span>
+              </button>
+              <button class="quick-sort-btn" data-sort="bst" title="Ordenar por BST total">
+                <span class="btn-icon">⭐</span> BST <span class="sort-indicator"></span>
+              </button>
+              <button class="quick-sort-btn active" data-sort="dex" title="Ordenar por Número Pokédex">
+                <span class="btn-icon">🔢</span> Dex <span class="sort-indicator">▲</span>
+              </button>
+              <button class="quick-sort-btn" data-sort="name" title="Ordenar por Nombre Alfabético">
+                <span class="btn-icon">🔤</span> A-Z <span class="sort-indicator"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Selector de Regiones -->
+          <div class="filter-group-row region-group-row">
+            <div class="filter-header-flex">
+              <span class="filter-group-label">🌍 Regiones del Mundo Pokémon:</span>
+              <span class="region-active-badge" id="region-active-badge">Todas las Regiones (966)</span>
+            </div>
+            <div class="region-nav-bar" id="region-filters">
+              <!-- Rellenado dinámicamente -->
+            </div>
+          </div>
+
+          <!-- Chips de Tipos Elementales -->
+          <div class="filter-group-row">
+            <span class="filter-group-label">Filtrar por Tipo Elemental:</span>
+            <div class="chips-cloud" id="type-filters">
+              <!-- Rellenado dinámicamente -->
+            </div>
+          </div>
+
+          <!-- Sliders de Estadísticas Mínimas -->
+          <div class="filter-group-row stat-sliders-row">
+            <div class="filter-header-flex">
+              <span class="filter-group-label">📊 Umbrales Mínimos de Estadísticas Reales:</span>
+              <button class="btn tiny ghost" id="reset-stats-sliders-btn">Restablecer Umbrales</button>
+            </div>
+            <div class="stat-sliders-grid">
+              <div class="stat-slider-item">
+                <div class="stat-slider-head">
+                  <span>❤️ Salud Mínima:</span>
+                  <b id="val-min-hp" class="gold">Cualquiera (70+)</b>
+                </div>
+                <input type="range" id="slider-min-hp" min="70" max="185" value="70" step="5" class="stat-range-slider">
+              </div>
+              <div class="stat-slider-item">
+                <div class="stat-slider-head">
+                  <span>⚔️ Ataque Mínimo:</span>
+                  <b id="val-min-atk" class="gold">Cualquiera (×0.76+)</b>
+                </div>
+                <input type="range" id="slider-min-atk" min="76" max="170" value="76" step="5"
+                  class="stat-range-slider">
+              </div>
+              <div class="stat-slider-item">
+                <div class="stat-slider-head">
+                  <span>⚡ Velocidad Mínima:</span>
+                  <b id="val-min-spd" class="gold">Cualquiera (80+)</b>
+                </div>
+                <input type="range" id="slider-min-spd" min="80" max="162" value="80" step="5"
+                  class="stat-range-slider">
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros de Categoría y Disponibilidad -->
+          <div class="filter-group-row">
+            <span class="filter-group-label">Categoría y Rol de Disponibilidad:</span>
+            <div class="chips-cloud" id="category-filters">
+              <!-- Rellenado dinámicamente -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Catálogo de Personajes -->
+      <section class="catalog-section" id="catalog-section">
+        <div class="catalog-status-bar">
+          <div class="status-left">
+            <span class="results-count" id="results-count">Cargando catálogo...</span>
+          </div>
+
+          <div class="status-right">
+            <div class="page-size-selector-wrap">
+              <label for="page-size-select">Mostrar:</label>
+              <select id="page-size-select" class="field small">
+                <option value="24">24 por pág</option>
+                <option value="36" selected>36 por pág</option>
+                <option value="48">48 por pág</option>
+                <option value="72">72 por pág</option>
+                <option value="96">96 por pág</option>
+                <option value="all">Todos (966)</option>
+              </select>
+            </div>
+
+            <div class="view-mode-selector">
+              <button class="view-mode-btn active" data-view="cards" title="Vista de tarjetas con sprites">🗂
+                Tarjetas</button>
+              <button class="view-mode-btn" data-view="compact" title="Vista compacta de filas">☰ Compacta</button>
+              <button class="view-mode-btn" data-view="table" title="Vista en tabla de datos">📊 Tabla</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de Paginación Superior -->
+        <nav class="pagination-bar" id="top-pagination" aria-label="Paginación superior del catálogo">
+          <!-- Renderizado dinámicamente -->
+        </nav>
+
+        <!-- Cuadrícula / Contenedor del Catálogo -->
+        <div id="catalog-grid" class="catalog-grid cards-mode">
+          <!-- Renderizado dinámicamente por character-analyzer.js -->
+        </div>
+
+        <!-- Barra de Paginación Inferior -->
+        <nav class="pagination-bar" id="bottom-pagination" aria-label="Paginación inferior del catálogo">
+          <!-- Renderizado dinámicamente -->
+        </nav>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VISTA 3: COMPARADOR TÁCTICO MULTIFICHA (2 - 4 POKÉMON)                    -->
+  <!-- ========================================================================= -->
+  <div class="app-view-panel" id="view-comparison">
+    <main class="analyzer-container">
+
+      <section class="pmd-box comparison-container-panel" id="comparison-section">
+        <div class="pmd-box-title">
+          <span>Sistema de Comparación de Personajes (2 - 4 Pokémon)</span>
+          <div class="comparison-header-tools">
+            <button class="btn small" id="share-comparison-btn">🔗 Compartir URL</button>
+            <button class="btn small" id="clear-comparison-btn">Vaciar</button>
+          </div>
+        </div>
+
+        <!-- Barra de Presets Rápidos -->
+        <div
+          style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1)">
+          <span style="font-size:13px; color:var(--muted); font-weight:700">⚡ Comparativas Rápidas:</span>
+          <button class="btn tiny"
+            onclick="Analyzer.Comparison.setSelection([1, 4, 7]); Analyzer.App.toast('Iniciales de Kanto cargados');">
+            🌱 Iniciales Kanto
+          </button>
+          <button class="btn tiny"
+            onclick="Analyzer.Comparison.setSelection([152, 155, 158]); Analyzer.App.toast('Iniciales de Johto cargados');">
+            🔥 Iniciales Johto
+          </button>
+          <button class="btn tiny"
+            onclick="Analyzer.Comparison.setSelection([252, 255, 258]); Analyzer.App.toast('Iniciales de Hoenn cargados');">
+            💧 Iniciales Hoenn
+          </button>
+          <button class="btn tiny gold"
+            onclick="Analyzer.Comparison.setSelection([150, 249, 384, 493]); Analyzer.App.toast('Cuarteto Legendario cargado');">
+            👑 Legendarios Clave
+          </button>
+          <button class="btn tiny gold"
+            onclick="Analyzer.TeamSuggester.generate({size:4}); Analyzer.Comparison.setSelection(Analyzer.TeamSuggester.getCurrentTeam().map(p=>p.dex)); Analyzer.App.toast('¡Escuadra de 4 jugadores sugerida!');">
+            🎲 Sugerir 4 Equilibrados
+          </button>
+          <button class="btn tiny" onclick="Analyzer.App.switchTab('catalog')" style="margin-left:auto">
+            + Añadir más desde Catálogo
+          </button>
+        </div>
+
+        <!-- Gráfico de Radar Central -->
+        <div class="radar-wrapper-box">
+          <div class="charts-row">
+            <div class="chart-panel">
+              <h4 class="chart-panel-title">🕸️ Radar de Rendimiento</h4>
+              <canvas id="comparison-radar-canvas" class="chart-canvas" width="460" height="400"></canvas>
+            </div>
+            <div class="chart-panel">
+              <h4 class="chart-panel-title">📊 Barras Comparativas</h4>
+              <canvas id="comparison-bars-canvas" class="chart-canvas" width="460" height="400"></canvas>
+            </div>
+          </div>
+          <div class="radar-legend" id="radar-legend">
+            <!-- Rellenado dinámicamente -->
+          </div>
+          <p class="chart-note">
+            ℹ️ Los gráficos muestran las mismas <b>puntuaciones 0-100</b> del <b>Rendimiento Evaluado</b> de cada ficha
+            (no son las estadísticas base). Por ejemplo, <b>Supervivencia</b> combina HP + resistencias de tipo + hitbox,
+            y <b>Ofensiva</b> combina ATK + DPS + movimientos. Pasa el cursor sobre un punto o barra para ver su valor.
+            <i>Late Game</i> y el <i>Índice Global</i> se ven en las tarjetas inferiores.
+          </p>
+          <div class="radar-axes-guide"
+            style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:10px; font-size:12px; color:var(--muted)">
+            <span style="color:var(--gold); font-weight:700">💡 Dimensiones Evaluadas (Pasa el cursor):</span>
+            <span class="metric-has-tooltip"
+              title="Daño Ofensivo: Multiplicador de ataque base, DPS estimado inicial y repertorio de movimientos agresivos">⚔️
+              Ofensiva <span class="metric-info-icon">ℹ️</span></span>
+            <span class="metric-has-tooltip"
+              title="Supervivencia: Puntos de salud (HP), balance de resistencias vs debilidades e inmunidades, y tamaño reducido de hitbox">🛡️
+              Supervivencia <span class="metric-info-icon">ℹ️</span></span>
+            <span class="metric-has-tooltip"
+              title="Movilidad: Velocidad de desplazamiento base, habilidad de levitar sobre líquidos/lava y acceso a movimientos Dash">⚡
+              Movilidad <span class="metric-info-icon">ℹ️</span></span>
+            <span class="metric-has-tooltip"
+              title="Control: Capacidad para contener hordas masivas (ralentización, proyectiles teledirigidos, minas, daño en área)">🎯
+              Control <span class="metric-info-icon">ℹ️</span></span>
+            <span class="metric-has-tooltip"
+              title="Flexibilidad: Amplitud del catálogo de movimientos aprendibles y variedad de arquetipos ofensivos">🔄
+              Flexibilidad <span class="metric-info-icon">ℹ️</span></span>
+            <span class="metric-has-tooltip"
+              title="Vs Jefes: Daño concentrado (burst), escalado de ataque y alcance a distancia seguro ante élites">👑
+              Vs Jefes <span class="metric-info-icon">ℹ️</span></span>
+            <span class="metric-has-tooltip"
+              title="Late Game: Escalado en oleadas avanzadas (minuto 15+), sinergia de evoluciones doradas y expediciones en Grietas">🌌
+              Late Game <span class="metric-info-icon">ℹ️</span></span>
+          </div>
+        </div>
+
+        <!-- Columnas Comparativas Alineadas -->
+        <div id="comparison-content">
+          <!-- Renderizado dinámicamente -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== Bandeja Inferior Flotante (Sticky Tray) ==================== -->
+  <aside class="comparison-tray hidden" id="comparison-tray">
+    <div class="tray-items" id="tray-items">
+      <!-- 4 ranuras de selección -->
+    </div>
+    <div style="display:flex; gap:8px">
+      <button class="btn gold" id="tray-compare-btn">Comparar (0/4)</button>
+      <button class="btn small ghost" id="tray-clear-btn" title="Limpiar bandeja">Vaciar</button>
+    </div>
+  </aside>
+
+  <!-- ==================== Modal Ficha Completa (Dossier) ==================== -->
+  <div class="modal-overlay hidden" id="dossier-modal">
+    <div class="pmd-box dossier-box-container">
+      <button class="modal-close-btn" id="modal-close-btn" title="Cerrar ficha">×</button>
+      <div id="modal-body-content">
+        <!-- Contenido generado por Analyzer.App.openModal(dex) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notificaciones -->
+  <div id="analyzer-toast" class="toast" style="display:none"></div>
+
+  <!-- ==================== Footer Landing ==================== -->
+  <footer class="landing-footer">
+    <div class="footer-content">
+      <div style="font-weight:700; color:#fff; font-size:16px; margin-bottom:6px">PokéSurvivor Character Analyzer</div>
+      <div>Herramienta no oficial de análisis de personajes creada por y para la comunidad.</div>
+      <div class="footer-links">
+        <a href="#home" onclick="Analyzer.App.switchTab('home')">Inicio & Dashboard</a>
+        <a href="#catalog" onclick="Analyzer.App.switchTab('catalog')">Catálogo</a>
+        <a href="#comparison" onclick="Analyzer.App.switchTab('comparison')">Comparador</a>
+        <a href="https://pokesurvivor.com" target="_blank" rel="noopener">Juego Oficial PokéSurvivor</a>
+      </div>
+      <div class="footer-disclaimer">
+        Pokémon y Pokémon Mystery Dungeon son marcas registradas de Nintendo, Game Freak y The Pokémon Company.<br>
+        Todos los datos de combate, stats y fórmulas provienen del código abierto de PokéSurvivor.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== Scripts Locales e Independientes ==================== -->
+  <!-- 1. Utilidades y Datos Oficiales (Copia Local) -->
+  <script src="js/core/util.js"></script>
+  <script src="js/data/pokedex.js"></script>
+  <script src="js/data/sprites-meta.js"></script>
+  <script src="js/data/moves.js"></script>
+  <script src="js/data/starters.js"></script>
+  <script src="js/data/enemies.js"></script>
+  <script src="js/data/types.js"></script>
+  <script src="js/data/upgrades.js"></script>
+  <script src="js/data/items.js"></script>
+
+  <!-- 2. Núcleo Gráfico con Fallback Inteligente (Local -> Repo -> CDN) -->
+  <script src="js/core/sprites.js"></script>
+  <script src="js/ui/icons.js"></script>
+  <script src="js/ui/ui.js"></script>
+
+  <!-- 3. Módulos del PokéSurvivor Character Analyzer -->
+  <script src="js/data-adapter.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/comparison.js"></script>
+  <script src="js/dungeon-bg.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/team-suggester.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/loadout.js"></script>
+  <script src="js/character-analyzer.js"></script>
+</body>
+
+</html>
