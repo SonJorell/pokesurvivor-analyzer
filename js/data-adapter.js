@@ -23,26 +23,32 @@ Analyzer.DataAdapter = (() => {
     6: 'Kalos', 7: 'Alola', 8: 'Galar', 9: 'Paldea'
   };
 
+  const getIco = (name, size = 14) => (window.Analyzer && Analyzer.Icons && Analyzer.Icons.get ? Analyzer.Icons.get(name, { size }) : '');
+
   // Metadatos de Regiones del Mundo Pokémon en PokéSurvivor (100% Verificados)
   const REGIONS = [
-    { id: 'all', gen: 'all', name: 'Todas las Regiones', icon: '🌐', dexRange: '#001 - #1024', count: 966 },
-    { id: 1, gen: 1, name: 'Kanto', icon: '🌲', dexRange: '#001 - #151', count: 151, minDex: 1, maxDex: 151 },
-    { id: 2, gen: 2, name: 'Johto', icon: '⛩️', dexRange: '#152 - #251', count: 100, minDex: 152, maxDex: 251 },
-    { id: 3, gen: 3, name: 'Hoenn', icon: '🌊', dexRange: '#252 - #386', count: 135, minDex: 252, maxDex: 386 },
-    { id: 4, gen: 4, name: 'Sinnoh', icon: '🏔️', dexRange: '#387 - #493', count: 107, minDex: 387, maxDex: 493 },
-    { id: 5, gen: 5, name: 'Teselia', icon: '🏙️', dexRange: '#494 - #649', count: 141, minDex: 494, maxDex: 649 },
-    { id: 6, gen: 6, name: 'Kalos', icon: '🏰', dexRange: '#650 - #721', count: 70, minDex: 650, maxDex: 721 },
-    { id: 7, gen: 7, name: 'Alola', icon: '🌺', dexRange: '#722 - #809', count: 83, minDex: 722, maxDex: 809 },
-    { id: 8, gen: 8, name: 'Galar', icon: '⚔️', dexRange: '#810 - #905', count: 87, minDex: 810, maxDex: 905 },
-    { id: 9, gen: 9, name: 'Paldea', icon: '🏜️', dexRange: '#906 - #1024', count: 92, minDex: 906, maxDex: 1024 }
+    { id: 'all', gen: 'all', name: 'Todas las Regiones', get icon() { return getIco('globe', 14); }, dexRange: '#001 - #1024', count: 966 },
+    { id: 1, gen: 1, name: 'Kanto', get icon() { return getIco('tree', 14); }, dexRange: '#001 - #151', count: 151, minDex: 1, maxDex: 151 },
+    { id: 2, gen: 2, name: 'Johto', get icon() { return getIco('temple', 14); }, dexRange: '#152 - #251', count: 100, minDex: 152, maxDex: 251 },
+    { id: 3, gen: 3, name: 'Hoenn', get icon() { return getIco('water', 14); }, dexRange: '#252 - #386', count: 135, minDex: 252, maxDex: 386 },
+    { id: 4, gen: 4, name: 'Sinnoh', get icon() { return getIco('mountain', 14); }, dexRange: '#387 - #493', count: 107, minDex: 387, maxDex: 493 },
+    { id: 5, gen: 5, name: 'Teselia', get icon() { return getIco('city', 14); }, dexRange: '#494 - #649', count: 141, minDex: 494, maxDex: 649 },
+    { id: 6, gen: 6, name: 'Kalos', get icon() { return getIco('castle', 14); }, dexRange: '#650 - #721', count: 70, minDex: 650, maxDex: 721 },
+    { id: 7, gen: 7, name: 'Alola', get icon() { return getIco('flower', 14); }, dexRange: '#722 - #809', count: 83, minDex: 722, maxDex: 809 },
+    { id: 8, gen: 8, name: 'Galar', get icon() { return getIco('swords', 14); }, dexRange: '#810 - #905', count: 87, minDex: 810, maxDex: 905 },
+    { id: 9, gen: 9, name: 'Paldea', get icon() { return getIco('dunes', 14); }, dexRange: '#906 - #1024', count: 92, minDex: 906, maxDex: 1024 }
   ];
 
-  // Rangos globales para normalizaciones analíticas
+  // Rangos globales para normalizaciones analíticas (100% verificados con los 966 Pokémon)
   const STAT_RANGES = {
-    hp:  { min: 70, max: 185, avg: 105.8 },
-    spd: { min: 80, max: 162, avg: 108.6 },
-    atk: { min: 0.76, max: 1.70, avg: 1.21 },
-    bst: { min: 175, max: 720, avg: 432.1 }
+    hp:  { min: 70, max: 185, avg: 101.3 },
+    spd: { min: 80, max: 162, avg: 106.2 },
+    atk: { min: 0.76, max: 1.70, avg: 1.18 },
+    pa:  { min: 0.73, max: 1.70, avg: 1.12 },
+    sa:  { min: 0.76, max: 1.65, avg: 1.08 },
+    df:  { min: 5, max: 230, avg: 71.9 },
+    sd:  { min: 20, max: 230, avg: 69.8 },
+    bst: { min: 175, max: 720, avg: 425.1 }
   };
 
   // Explicaciones detalladas de cada rendimiento analítico evaluado (para tooltips y ayudas)
@@ -51,7 +57,7 @@ Analyzer.DataAdapter = (() => {
       key: 'overall',
       name: 'Rendimiento Global',
       shortName: 'Global',
-      icon: '⭐',
+      get icon() { return getIco('star', 14); },
       shortDesc: 'Puntuación analítica integral ponderada de todas las dimensiones tácticas.',
       fullDesc: 'Media ponderada que sintetiza las 6 dimensiones clave (Ofensiva 22%, Supervivencia 20%, Movilidad 18%, Control 14%, Flexibilidad 12% y Jefes 14%). Refleja la solvencia y consistencia general del Pokémon a lo largo de una partida completa.',
       desc: 'Puntuación integral (0-100) que sintetiza el daño, supervivencia, agilidad, control de masas y efectividad contra jefes en el motor de combate de PokéSurvivor.'
@@ -60,7 +66,7 @@ Analyzer.DataAdapter = (() => {
       key: 'offensive',
       name: 'Daño Ofensivo',
       shortName: 'Ofensiva',
-      icon: '⚔️',
+      get icon() { return getIco('sword', 14); },
       shortDesc: 'Capacidad de infligir daño continuo y en ráfaga a los enemigos.',
       fullDesc: 'Combina el multiplicador base de Ataque (55%), el DPS estimado de su movimiento inicial (25%) y la variedad de movimientos ofensivos de su repertorio (20%) para evaluar el potencial de daño directo.',
       desc: 'Capacidad destructiva calculada combinando el multiplicador ATK base del Pokémon (hasta ×1.70), el daño y cadencia de su ataque inicial, y la variedad de movimientos ofensivos aprendibles.'
@@ -69,16 +75,16 @@ Analyzer.DataAdapter = (() => {
       key: 'survival',
       name: 'Supervivencia',
       shortName: 'Defensa',
-      icon: '🛡️',
-      shortDesc: 'Durabilidad, defensas elementales y evasión por tamaño de hitbox.',
-      fullDesc: 'Integra los Puntos de Salud (HP) base (45%), la red defensiva de tipos (resistencias vs debilidades e inmunidades elementales, 45%) y el tamaño reducido de su hitbox (evasión pasiva de colisiones, 10%).',
-      desc: 'Resistencia a morir en combate basada en la salud máxima en juego (70 a 185 HP), la tabla de resistencias y debilidades elementales cruzadas, y el tamaño reducido de su hitbox para esquivar.'
+      get icon() { return getIco('shield', 14); },
+      shortDesc: 'Durabilidad, defensas física/especial, tipos y evasión por hitbox.',
+      fullDesc: 'Integra los Puntos de Salud (HP) base (35%), la mitigación por Defensa Física y Especial de G.Stats (15%), la red defensiva de tipos (resistencias vs debilidades e inmunidades, 40%) y el tamaño reducido de su hitbox (evasión pasiva de colisiones, 10%).',
+      desc: 'Resistencia a morir en combate basada en la salud máxima (70 a 185 HP), la mitigación de daño con Defensa (df) y Def. Especial (sd) según G.Stats, la tabla elemental suavizada y el tamaño de hitbox.'
     },
     mobility: {
       key: 'mobility',
       name: 'Movilidad',
       shortName: 'Agilidad',
-      icon: '⚡',
+      get icon() { return getIco('zap', 14); },
       shortDesc: 'Velocidad de desplazamiento, levitación sobre terrenos y dashes.',
       fullDesc: 'Califica la agilidad para esquivar y recorrer la mazmorra. Considera la Velocidad de movimiento base (70%), la capacidad de levitar/flotar sobre terrenos adversos (agua, pantano, lava, +18 pts) y el acceso a movimientos tipo Dash (+12 pts).',
       desc: 'Agilidad para desplazarse y esquivar calculada con la velocidad base (80 a 162 SPD), bonificación de flotación sobre agua, lava y rocas (G.Sprites.hovers), y acceso a movimientos con dash o embestida.'
@@ -87,7 +93,7 @@ Analyzer.DataAdapter = (() => {
       key: 'control',
       name: 'Control y Alcance',
       shortName: 'Control',
-      icon: '🎯',
+      get icon() { return getIco('target', 14); },
       shortDesc: 'Capacidad para frenar o neutralizar hordas densas con AoE o estados.',
       fullDesc: 'Mide la capacidad de contener y neutralizar hordas densas de enemigos. Premia efectos de ralentización/aturdimiento (+20), proyectiles teledirigidos (homing, +20), daño en área/novas (+20), minas (+15), perforación (+15) y alto retroceso (knockback, +10).',
       desc: 'Capacidad de neutralizar oleadas masivas con efectos de proyectiles perforantes (pierce), atracción teledirigida (homing), parálisis/ralentización, áreas de daño (AoE) y empuje.'
@@ -96,7 +102,7 @@ Analyzer.DataAdapter = (() => {
       key: 'flexibility',
       name: 'Flexibilidad de Build',
       shortName: 'Versatilidad',
-      icon: '🔄',
+      get icon() { return getIco('sync', 14); },
       shortDesc: 'Variedad de arquetipos y opciones de adaptación al subir de nivel.',
       fullDesc: 'Variedad de opciones tácticas al subir de nivel. Se basa en el número total de movimientos aprendibles (50%) y la diversidad de arquetipos disponibles (proyectil, rayo, aura, nova, minas, cuerpo a cuerpo, etc., 50%).',
       desc: 'Variedad de opciones viables durante la partida según la cantidad total de movimientos aprendibles y la diversidad de tipos elementales en su repertorio bélico.'
@@ -105,7 +111,7 @@ Analyzer.DataAdapter = (() => {
       key: 'boss',
       name: 'Rendimiento vs Jefes',
       shortName: 'Anti-Jefes',
-      icon: '👑',
+      get icon() { return getIco('crown', 14); },
       shortDesc: 'Eficacia y seguridad al derribar jefes solitarios y élites de oleada.',
       fullDesc: 'Eficacia al enfrentar jefes solitarios y élites de oleada. Premia el daño concentrado (burst damage de 24+ potencia, 25 pts), multiplicador de ataque escalado (55%) y la seguridad para atacar a distancia sin exponerse al contacto (20 pts).',
       desc: 'Eficacia en los minutos 3, 6, 9, 12 y 15 combinando daño concentrado (burst), seguridad de alcance y ataques de alto impacto individual para eliminar bosses rápidamente.'
@@ -114,7 +120,7 @@ Analyzer.DataAdapter = (() => {
       key: 'lateGame',
       name: 'Partidas Prolongadas',
       shortName: 'Late Game',
-      icon: '🌌',
+      get icon() { return getIco('galaxy', 14); },
       shortDesc: 'Potencial de escalado en oleadas avanzadas (min 15+) y expediciones.',
       fullDesc: 'Potencial en oleadas avanzadas (minuto 15+) y expediciones en Grietas. Mide la cantidad de movimientos con evolución dorada (+30%), el balance combinado de supervivencia y ataque, y su autosuficiencia ante hordas extremas.',
       desc: 'Potencial para superar oleadas avanzadas más allá del minuto 20 y grietas dimensionales gracias a las evoluciones de sus movimientos y resistencia acumulada.'
@@ -128,7 +134,7 @@ Analyzer.DataAdapter = (() => {
   /**
    * Determina la disponibilidad de un Pokémon en PokéSurvivor:
    * 1. Inicial (Starter): Test de personalidad o elección directa en el menú inicial.
-   * 2. Banner de Gacha: Disponible por tickets en su generación según su rareza (1★ a 5★).
+   * 2. Banner de Gacha: Disponible por tickets en su generación según su rareza (1 a 5 estrellas).
    * 3. Legendario / Grieta: Solo aparece en grietas dimensionales del Mundo Distorsión (y Arceus al min 30).
    * 4. Enemigo Salvaje: Aparece en hordas o tramos según su BST.
    * 5. Jefe de Mapa: Aparece en minutos 3, 6, 9, 12, 15 si tiene BST alto y no es legendario.
@@ -157,7 +163,7 @@ Analyzer.DataAdapter = (() => {
         ? 'Inicial seleccionable y gacha'
         : isLegendary
           ? 'Jefe de Grieta / Evento legendario'
-          : `Gacha (${p.rarity}★) y enemigo salvaje`
+          : `Gacha (${p.rarity} Estrellas) y enemigo salvaje`
     };
   }
 
@@ -213,11 +219,18 @@ Analyzer.DataAdapter = (() => {
       const def = G.Moves.BY_ID[id];
       if (!def) return null;
       const evo = G.Moves.EVO ? G.Moves.EVO[id] : null;
+      const cat = def.cat || null;
+      const catName = cat === 'physical' ? 'Físico' : cat === 'special' ? 'Especial' : 'Mejora';
+      const fit = (window.G && G.Stats && G.Stats.fit) ? G.Stats.fit(p, cat) : 1;
       return {
         id,
         name: def.name,
         type: def.type,
         kind: def.kind,
+        cat,
+        catName,
+        fit: Math.round(fit * 100) / 100,
+        fitPct: Math.round(fit * 100),
         desc: def.desc,
         cd: def.cd,
         dmg: def.dmg || 0,
@@ -230,6 +243,11 @@ Analyzer.DataAdapter = (() => {
         poison: def.poison || 0,
         slow: def.slow || 0,
         homing: def.homing || 0,
+        bounce: def.bounce || 0,
+        charge: def.charge || 0,
+        stun: def.stun || 0,
+        pull: def.pull || 0,
+        dur: def.dur || 0,
         stat: def.stat || null,
         amount: def.amount || 0,
         evolution: evo ? {
@@ -242,6 +260,8 @@ Analyzer.DataAdapter = (() => {
 
     // Variedad de familias (kinds)
     const kindsSet = new Set(poolMoves.map(m => m.kind));
+    const startCat = startMoveDef ? startMoveDef.cat || null : null;
+    const startFit = (startMoveDef && window.G && G.Stats && G.Stats.fit) ? G.Stats.fit(p, startCat) : 1;
 
     return {
       startMoveId,
@@ -250,6 +270,10 @@ Analyzer.DataAdapter = (() => {
         name: startMoveDef.name,
         type: startMoveDef.type,
         kind: startMoveDef.kind,
+        cat: startCat,
+        catName: startCat === 'physical' ? 'Físico' : startCat === 'special' ? 'Especial' : 'Mejora',
+        fit: Math.round(startFit * 100) / 100,
+        fitPct: Math.round(startFit * 100),
         desc: startMoveDef.desc,
         cd: startMoveDef.cd,
         dmg: startMoveDef.dmg || 0,
@@ -562,14 +586,19 @@ Analyzer.DataAdapter = (() => {
     const varietyBonus = clamp((damageMoves / 10) * 20, 5, 20);
     const offensiveRating = Math.round(clamp(atkNorm + dpsNorm + varietyBonus, 10, 100));
 
-    // 2. Supervivencia
-    const hpNorm = ((p.hp - 70) / (185 - 70)) * 45;
+    // 2. Supervivencia (Salud + Mitigación por Defensas G.Stats + Red de tipos + Hitbox)
+    const hpNorm = ((p.hp - 70) / (185 - 70)) * 35;
+    const physTaken = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken(p, 'physical') : 1.0;
+    const specTaken = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken(p, 'special') : 1.0;
+    const avgTaken = (physTaken + specTaken) / 2;
+    // avgTaken va de 0.78 (230 def) a 1.25 (5 def). Escala de 0 a 15 pts:
+    const defScore = clamp(((1.25 - avgTaken) / (1.25 - 0.78)) * 15, 0, 15);
     const resCount = typeMatchups ? typeMatchups.resistCount : 2;
     const weakCount = typeMatchups ? typeMatchups.weakCount : 2;
     const immCount = typeMatchups ? typeMatchups.immuneEquivalentCount : 0;
-    const defTypeScore = clamp(30 + (resCount * 2.5) - (weakCount * 3.5) + (immCount * 5), 5, 45);
+    const defTypeScore = clamp(25 + (resCount * 2.5) - (weakCount * 3.5) + (immCount * 5), 5, 40);
     const hitboxEvasion = clamp(((26 - spriteMeta.bodyRadius) / 21) * 10, 0, 10);
-    const survivalRating = Math.round(clamp(hpNorm + defTypeScore + hitboxEvasion, 10, 100));
+    const survivalRating = Math.round(clamp(hpNorm + defScore + defTypeScore + hitboxEvasion, 10, 100));
 
     // 3. Movilidad
     const spdNorm = ((p.spd - 80) / (162 - 80)) * 70;
@@ -578,14 +607,15 @@ Analyzer.DataAdapter = (() => {
     const dashBonus = hasDash ? 12 : 0;
     const mobilityRating = Math.round(clamp(spdNorm + hoverBonus + dashBonus, 10, 100));
 
-    // 4. Control y Alcance
+    // 4. Control y Alcance (Nuevos kinds: homing, stun, vortex, bounce, shove, quake, spin)
     let ccScore = 0;
-    if (movesData.poolMoves.some(m => m.homing > 0)) ccScore += 20;
-    if (movesData.poolMoves.some(m => m.slow > 0)) ccScore += 20;
-    if (movesData.poolMoves.some(m => m.kind === 'nova' || m.kind === 'aura' || m.kind === 'orbit')) ccScore += 20;
-    if (movesData.poolMoves.some(m => m.kind === 'mine')) ccScore += 15;
-    if (movesData.poolMoves.some(m => m.pierce > 0)) ccScore += 15;
-    if (movesData.poolMoves.some(m => m.knock >= 70)) ccScore += 10;
+    if (movesData.poolMoves.some(m => m.homing > 0 || m.kind === 'homing')) ccScore += 20;
+    if (movesData.poolMoves.some(m => m.slow > 0 || m.stun > 0 || m.kind === 'stun')) ccScore += 20;
+    if (movesData.poolMoves.some(m => m.kind === 'vortex' || m.pull > 0)) ccScore += 20;
+    if (movesData.poolMoves.some(m => m.kind === 'nova' || m.kind === 'aura' || m.kind === 'orbit' || m.kind === 'spin' || m.kind === 'quake')) ccScore += 18;
+    if (movesData.poolMoves.some(m => m.kind === 'mine')) ccScore += 14;
+    if (movesData.poolMoves.some(m => m.pierce > 0 || m.bounce > 0 || m.kind === 'bounce')) ccScore += 16;
+    if (movesData.poolMoves.some(m => m.knock >= 70 || m.kind === 'shove')) ccScore += 12;
     const controlRating = Math.round(clamp(ccScore, 15, 100));
 
     // 5. Flexibilidad
@@ -594,8 +624,8 @@ Analyzer.DataAdapter = (() => {
     const flexibilityRating = Math.round(clamp(movesCountScore + kindsScore, 15, 100));
 
     // 6. Rendimiento contra Jefes
-    const singleBurst = movesData.poolMoves.some(m => m.dmg >= 24) ? 25 : 12;
-    const rangedSafety = movesData.poolMoves.some(m => m.kind === 'beam' || m.kind === 'projectile') ? 20 : 8;
+    const singleBurst = movesData.poolMoves.some(m => m.dmg >= 24 || m.kind === 'charge') ? 25 : 12;
+    const rangedSafety = movesData.poolMoves.some(m => m.kind === 'beam' || m.kind === 'projectile' || m.kind === 'homing' || m.kind === 'bounce') ? 20 : 8;
     const bossRating = Math.round(clamp((atkNorm * 0.55) + singleBurst + rangedSafety, 15, 100));
 
     // 7. Partidas Prolongadas (Late Game / Grietas)
@@ -625,7 +655,7 @@ Analyzer.DataAdapter = (() => {
       overall: overallScore,
       metricDefinitions: METRIC_DEFINITIONS,
       formulasDocumentation: {
-        methodology: 'Normalización min-max empírica sobre las variables verificadas del código fuente de PokéSurvivor.',
+        methodology: 'Normalización min-max empírica sobre las variables verificadas del código fuente de PokéSurvivor (incluye mitigación por Def/Sp.Def según G.Stats).',
         limits: 'Estas puntuaciones analíticas resumen tendencias de juego; el rendimiento en cada run depende además de los vínculos de grieta obtenidos, objetos equipados y cartas de subida de nivel seleccionadas.'
       }
     };
@@ -645,6 +675,17 @@ Analyzer.DataAdapter = (() => {
     const availability = getAvailability(raw);
     const performance = calculatePerformanceRatings(raw, spriteMeta, movesData, typeMatchups, liquidInteractions);
 
+    const pa = raw.pa != null ? raw.pa : raw.atk;
+    const sa = raw.sa != null ? raw.sa : raw.atk;
+    const df = raw.df != null ? raw.df : 75;
+    const sd = raw.sd != null ? raw.sd : 75;
+    const side = (window.G && G.Stats && G.Stats.sideOf) ? G.Stats.sideOf(raw) : (sa > pa ? 'special' : 'physical');
+    const sideName = (window.G && G.Stats && G.Stats.NAME && G.Stats.NAME[side]) || (side === 'special' ? 'Especial' : 'Físico');
+    const takenPhysical = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken(raw, 'physical') : 1.0;
+    const takenSpecial = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken(raw, 'special') : 1.0;
+    const mitigationPhysical = Math.round((1 - takenPhysical) * 100);
+    const mitigationSpecial = Math.round((1 - takenSpecial) * 100);
+
     return {
       dex: raw.dex,
       name: raw.name,
@@ -654,10 +695,21 @@ Analyzer.DataAdapter = (() => {
       primaryType: raw.types[0],
       secondaryType: raw.types[1] || null,
 
-      // Estadísticas verificadas de juego
+      // Estadísticas verificadas de juego (incluyendo Físico/Especial y Defensas de G.Stats)
       hp: raw.hp,
       spd: raw.spd,
       atk: raw.atk,
+      pa,
+      sa,
+      df,
+      sd,
+      side,
+      sideName,
+      takenPhysical,
+      takenSpecial,
+      mitigationPhysical,
+      mitigationSpecial,
+      avgDefense: Math.round(((df + sd) / 2) * 10) / 10,
       bst: raw.bst,
       rarity: raw.rarity,
       isStarter: !!raw.starter,
@@ -693,12 +745,12 @@ Analyzer.DataAdapter = (() => {
           'js/data/moves.js',
           'js/data/starters.js',
           'js/data/enemies.js',
-          'js/data/types.js'
+          'js/data/types.js',
+          'js/systems/stats.js'
         ],
         unavailableFeatures: [
-          { feature: 'Habilidades (Abilities clásicas)', status: 'No disponible', reason: 'PokéSurvivor no implementa el sistema de habilidades de los juegos principales.' },
-          { feature: 'Estadísticas individuales de Defensa y Def. Especial', status: 'No disponible', reason: 'En combate el juego utiliza una reducción de daño porcentual general y stats derivados de BST.' },
-          { feature: 'EVs / IVs / Naturalezas', status: 'No disponible', reason: 'No existen en el motor; los stats son fijos según la especie más mejoras permanentes de la tienda.' }
+          { feature: 'Habilidades (Abilities clásicas)', status: 'No disponible', reason: 'PokéSurvivor no implementa el sistema de habilidades pasivas de los juegos principales.' },
+          { feature: 'EVs / IVs / Naturalezas', status: 'No disponible', reason: 'No existen en el motor; los stats son fijos según la especie más mejoras permanentes de la tienda y objetos.' }
         ]
       }
     };
@@ -721,7 +773,35 @@ Analyzer.DataAdapter = (() => {
       dexMap.set(p.dex, p);
     }
 
+    // Calcula de forma dinámica y exacta las medias globales sobre el dataset completo
+    computeGlobalStatRanges(enrichedCache);
+
     return enrichedCache;
+  }
+
+  function computeGlobalStatRanges(cache) {
+    if (!cache || cache.length === 0) return;
+    const keys = ['hp', 'spd', 'atk', 'pa', 'sa', 'df', 'sd', 'bst'];
+    for (const k of keys) {
+      let min = Infinity, max = -Infinity, sum = 0, count = 0;
+      for (const p of cache) {
+        const val = p[k];
+        if (typeof val === 'number' && !isNaN(val)) {
+          if (val < min) min = val;
+          if (val > max) max = val;
+          sum += val;
+          count++;
+        }
+      }
+      if (count > 0) {
+        const decimals = (k === 'atk' || k === 'pa' || k === 'sa') ? 2 : 1;
+        STAT_RANGES[k] = {
+          min,
+          max,
+          avg: Number((sum / count).toFixed(decimals))
+        };
+      }
+    }
   }
 
   function getAll() {
@@ -790,6 +870,10 @@ Analyzer.DataAdapter = (() => {
     const baseDps = startMove ? startMove.dpsEstimate : 0;
     const base = {
       atk: p.atk,
+      pa: p.pa != null ? p.pa : p.atk,
+      sa: p.sa != null ? p.sa : p.atk,
+      df: p.df != null ? p.df : 75,
+      sd: p.sd != null ? p.sd : 75,
       spd: p.spd,
       effHp: p.hp,
       dps: baseDps,
@@ -803,7 +887,7 @@ Analyzer.DataAdapter = (() => {
       PERF_KEYS.forEach(k => { zero[k] = 0; });
       return {
         item: null, base, stats: Object.assign({}, base), performance: p.performance,
-        perfDelta: zero, statDelta: { atk: 0, spd: 0, effHp: 0, dps: 0, regen: 0 }
+        perfDelta: zero, statDelta: { atk: 0, pa: 0, sa: 0, spd: 0, effHp: 0, dps: 0, regen: 0 }
       };
     }
 
@@ -814,13 +898,17 @@ Analyzer.DataAdapter = (() => {
 
     const stats = {
       atk: p.atk * atkMul,
+      pa: (p.pa != null ? p.pa : p.atk) * atkMul,
+      sa: (p.sa != null ? p.sa : p.atk) * atkMul,
+      df: p.df != null ? p.df : 75,
+      sd: p.sd != null ? p.sd : 75,
       spd: p.spd * spdMul,
       effHp: p.hp / (1 - dmgReduce),
       dps: Math.round((baseDps * atkMul / cdMul) * 10) / 10,
       regen: Math.round(p.hp * (fx.regenPct || 0) * 10) / 10
     };
 
-    const modRaw = { atk: stats.atk, spd: stats.spd, hp: stats.effHp };
+    const modRaw = { atk: stats.atk, pa: stats.pa, sa: stats.sa, df: stats.df, sd: stats.sd, spd: stats.spd, hp: stats.effHp };
     const modMoves = Object.assign({}, p.moves, {
       startMove: startMove ? Object.assign({}, startMove, { dpsEstimate: stats.dps }) : null
     });
@@ -830,6 +918,8 @@ Analyzer.DataAdapter = (() => {
     PERF_KEYS.forEach(k => { perfDelta[k] = (performance[k] || 0) - (p.performance[k] || 0); });
     const statDelta = {
       atk: stats.atk - base.atk,
+      pa: stats.pa - base.pa,
+      sa: stats.sa - base.sa,
       spd: stats.spd - base.spd,
       effHp: stats.effHp - base.effHp,
       dps: Math.round((stats.dps - base.dps) * 10) / 10,

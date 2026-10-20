@@ -81,13 +81,16 @@ Analyzer.Loadout = (() => {
     if (r.item) {
       const s = r.stats, b = r.base, d = r.statDelta, pd = r.perfDelta, pf = r.performance, bp = p.performance;
       const perfRows = [
-        ['⚔️ Ofensiva', 'offensive'],
-        ['🛡️ Supervivencia', 'survival'],
-        ['⚡ Movilidad', 'mobility'],
-        ['👑 Vs Jefes', 'boss'],
-        ['🌌 Late Game', 'lateGame'],
-        ['⭐ Índice Global', 'overall']
-      ].map(([lbl, k]) => row(lbl, bp[k], pf[k], fmtDelta(pd[k]))).join('');
+        ['Ofensiva', 'offensive', 'sword'],
+        ['Supervivencia', 'survival', 'shield'],
+        ['Movilidad', 'mobility', 'zap'],
+        ['Vs Jefes', 'boss', 'crown'],
+        ['Late Game', 'lateGame', 'portal'],
+        ['Índice Global', 'overall', 'star']
+      ].map(([lbl, k, ico]) => {
+        const iconHtml = (window.Analyzer && Analyzer.Icons) ? Analyzer.Icons.get(ico, { size: 14 }) + ' ' : '';
+        return row(iconHtml + lbl, bp[k], pf[k], fmtDelta(pd[k]));
+      }).join('');
 
       body = `
         <p class="item-desc"><b>${r.item.name}:</b> ${r.item.desc}</p>
@@ -96,7 +99,9 @@ Analyzer.Loadout = (() => {
           <table class="analyzer-table item-compare-table">
             <thead><tr><th>Estadística</th><th>Base</th><th>Con objeto</th><th>Cambio</th></tr></thead>
             <tbody>
-              ${row('Ataque (×)', '×' + b.atk.toFixed(2), '×' + s.atk.toFixed(2), fmtDelta(d.atk, 2, '×'))}
+              ${row('Ataque Dominante', '×' + b.atk.toFixed(2), '×' + s.atk.toFixed(2), fmtDelta(d.atk, 2, '×'))}
+              ${row('Atk Físico (PA)', '×' + (b.pa != null ? b.pa : b.atk).toFixed(2), '×' + (s.pa != null ? s.pa : s.atk).toFixed(2), fmtDelta(d.pa, 2, '×'))}
+              ${row('At. Especial (SA)', '×' + (b.sa != null ? b.sa : b.atk).toFixed(2), '×' + (s.sa != null ? s.sa : s.atk).toFixed(2), fmtDelta(d.sa, 2, '×'))}
               ${row('Velocidad', Math.round(b.spd), Math.round(s.spd), fmtDelta(d.spd, 0))}
               ${row('Vida efectiva', Math.round(b.effHp), Math.round(s.effHp), fmtDelta(d.effHp, 0))}
               ${row('DPS ataque inicial', b.dps, s.dps, fmtDelta(d.dps, 1))}
@@ -111,7 +116,7 @@ Analyzer.Loadout = (() => {
 
     return `
       <div class="item-panel" data-dex="${p.dex}">
-        <label class="item-select-label" for="item-select-${p.dex}">🎒 Objeto equipado:</label>
+        <label class="item-select-label" for="item-select-${p.dex}">${(window.Analyzer && Analyzer.Icons) ? Analyzer.Icons.get('backpack', { size: 14 }) + ' ' : ''}Objeto equipado:</label>
         <select class="field item-select" id="item-select-${p.dex}" data-dex="${p.dex}">${options}</select>
         ${body}
       </div>`;

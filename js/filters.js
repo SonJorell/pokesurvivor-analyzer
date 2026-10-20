@@ -184,6 +184,18 @@ Analyzer.Filters = (() => {
         case 'atk':
           cmp = a.atk - b.atk;
           break;
+        case 'pa':
+          cmp = (a.pa || a.atk) - (b.pa || b.atk);
+          break;
+        case 'sa':
+          cmp = (a.sa || a.atk) - (b.sa || b.atk);
+          break;
+        case 'df':
+          cmp = (a.df || 75) - (b.df || 75);
+          break;
+        case 'sd':
+          cmp = (a.sd || 75) - (b.sd || 75);
+          break;
         case 'bst':
           cmp = a.bst - b.bst;
           break;

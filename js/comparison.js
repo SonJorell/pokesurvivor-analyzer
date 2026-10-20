@@ -13,7 +13,7 @@ Analyzer.Comparison = (() => {
 
   const STORAGE_KEY = 'pokesurvivor_character_analyzer_comparison';
   const MAX_SELECTION = 4;
-  const MIN_SELECTION = 2;
+  const MIN_SELECTION = 1;
 
   // Lista de dex seleccionados [dex1, dex2, ...]
   let selectedDexes = [];
@@ -220,6 +220,10 @@ Analyzer.Comparison = (() => {
       hp: calculateDelta(pokemon.hp, referencePokemon.hp, 0),
       spd: calculateDelta(pokemon.spd, referencePokemon.spd, 0),
       atk: calculateDelta(pokemon.atk, referencePokemon.atk, 2),
+      pa: calculateDelta(pokemon.pa != null ? pokemon.pa : pokemon.atk, referencePokemon.pa != null ? referencePokemon.pa : referencePokemon.atk, 2),
+      sa: calculateDelta(pokemon.sa != null ? pokemon.sa : pokemon.atk, referencePokemon.sa != null ? referencePokemon.sa : referencePokemon.atk, 2),
+      df: calculateDelta(pokemon.df != null ? pokemon.df : 75, referencePokemon.df != null ? referencePokemon.df : 75, 0),
+      sd: calculateDelta(pokemon.sd != null ? pokemon.sd : 75, referencePokemon.sd != null ? referencePokemon.sd : 75, 0),
       bst: calculateDelta(pokemon.bst, referencePokemon.bst, 0),
       overall: calculateDelta(pokemon.performance.overall, referencePokemon.performance.overall, 0),
       bodyRadius: calculateDelta(pokemon.sprite.bodyRadius, referencePokemon.sprite.bodyRadius, 1),
@@ -248,11 +252,30 @@ Analyzer.Comparison = (() => {
       limitations.push(`Velocidad reducida (${p.spd}): Dificultad para escapar de enemigos rápidos tipo 'runner' o 'charger'.`);
     }
 
-    // 3. Multiplicador de Ataque (Atk)
+    // 3. Ataque y Especialización Física / Especial
     if (p.atk >= 1.35) {
-      strengths.push(`Multiplicador ofensivo letal (×${p.atk.toFixed(2)}): Máximo aprovechamiento de cualquier movimiento.`);
+      strengths.push(`Multiplicador ofensivo letal (×${p.atk.toFixed(2)}): Daño abrumador en su categoría fuerte (${p.sideName || 'Físico'}).`);
     } else if (p.atk <= 1.0) {
       limitations.push(`Ataque moderado o bajo (×${p.atk.toFixed(2)}): Requiere mejoras de 'Fuerza' o cartas de subida para limpiar rápido.`);
+    }
+    if (p.pa != null && p.sa != null) {
+      if (p.side === 'physical' && p.pa >= 1.25) {
+        strengths.push(`Atacante Físico devastador (PA ×${p.pa.toFixed(2)}): Máxima sinergia con ataques físicos y de contacto.`);
+      } else if (p.side === 'special' && p.sa >= 1.25) {
+        strengths.push(`Atacante Especial devastador (SA ×${p.sa.toFixed(2)}): Máxima sinergia con proyectiles elementales y rayos.`);
+      }
+    }
+
+    // 4. Defensas Física y Especial (Mitigaciones G.Stats)
+    if (p.df != null && p.df >= 100) {
+      strengths.push(`Defensa Física destacada (${p.df}): Reduce un ${p.mitigationPhysical}% del daño de ataques físicos enemigos.`);
+    } else if (p.df != null && p.df <= 45) {
+      limitations.push(`Defensa Física frágil (${p.df}): Recibe un ${Math.abs(p.mitigationPhysical)}% más de daño físico.`);
+    }
+    if (p.sd != null && p.sd >= 100) {
+      strengths.push(`Defensa Especial destacada (${p.sd}): Reduce un ${p.mitigationSpecial}% del daño de ataques especiales enemigos.`);
+    } else if (p.sd != null && p.sd <= 45) {
+      limitations.push(`Defensa Especial frágil (${p.sd}): Recibe un ${Math.abs(p.mitigationSpecial)}% más de daño especial.`);
     }
 
     // 4. Hitbox y flotación
@@ -316,7 +339,12 @@ Analyzer.Comparison = (() => {
       'Tipos',
       'Vida (HP)',
       'Velocidad (Spd)',
-      'Multiplicador Ataque',
+      'Multiplicador Ataque Dominante',
+      'Ataque Físico (PA)',
+      'Ataque Especial (SA)',
+      'Lado Fuerte',
+      'Defensa Física (DF)',
+      'Defensa Especial (SD)',
       'BST (Base Total)',
       'Rareza',
       'Es Inicial',
@@ -343,6 +371,11 @@ Analyzer.Comparison = (() => {
       p.hp,
       p.spd,
       p.atk.toFixed(2),
+      (p.pa != null ? p.pa : p.atk).toFixed(2),
+      (p.sa != null ? p.sa : p.atk).toFixed(2),
+      `"${p.sideName || 'Físico'}"`,
+      p.df != null ? p.df : 75,
+      p.sd != null ? p.sd : 75,
       p.bst,
       p.availability.rarityName,
       p.isStarter ? 'Sí' : 'No',

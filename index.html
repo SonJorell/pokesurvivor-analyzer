@@ -13,9 +13,21 @@
   <link rel="icon" type="image/png" sizes="48x48" href="assets/icons/icon-48.png">
   <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/icon-96.png">
 
-  <!-- Estilos del Analizador y Landing Page -->
-  <link rel="stylesheet" href="css/character-analyzer.css">
-  <link rel="stylesheet" href="css/landing.css">
+  <!-- Tipografía Pixel Art Oficial PokéSurvivor (Pixelify PS con números redibujados) -->
+  <link rel="preload" href="assets/fonts/PixelifyPS-400.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/PixelifyPS-700.ttf" as="font" type="font/ttf" crossorigin>
+
+  <!-- Estilos del Analizador y Landing Page (con control anti-caché) -->
+  <link rel="stylesheet" href="css/character-analyzer.css?v=3.8">
+  <link rel="stylesheet" href="css/landing.css?v=3.8">
+
+  <!-- Vercel Web Analytics & Speed Insights -->
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
 
 <body>
@@ -32,39 +44,54 @@
   <canvas id="dungeon-bg-canvas" class="dungeon-bg-canvas"></canvas>
 
   <!-- ==================== Barra de Navegación Principal (Tabs) ==================== -->
-  <header class="landing-header">
-    <a href="#home" class="brand-group" onclick="Analyzer.App.switchTab('home')">
-      <img src="assets/icons/icon-48.png" alt="PokéSurvivor" class="brand-icon">
-      <div>
-        <div class="brand-text-title">PokéSurvivor Analyzer</div>
-        <div class="brand-text-badge">Compendio & Métricas Oficiales</div>
-      </div>
-    </a>
-
-    <!-- Selector de Pestañas Principales -->
-    <nav class="nav-links">
-      <button class="nav-tab-btn active" data-tab="home" onclick="Analyzer.App.switchTab('home')">
-        <span>🏠 Inicio & Dashboard</span>
-      </button>
-      <button class="nav-tab-btn" data-tab="catalog" onclick="Analyzer.App.switchTab('catalog')">
-        <span>🗂 Catálogo (966)</span>
-      </button>
-      <button class="nav-tab-btn" data-tab="comparison" onclick="Analyzer.App.switchTab('comparison')">
-        <span>⚔️ Comparador</span>
-        <span class="nav-badge" id="nav-compare-count" style="display:none">0</span>
-      </button>
-
-      <!-- Selector de Tema / Fondo de Video (Claro / Oscuro) -->
-      <button class="theme-toggle-btn" id="theme-toggle-btn" type="button" aria-label="Cambiar tema de fondo"
-        title="Alternar entre Fondo Oscuro y Fondo Claro">
-        <span class="theme-toggle-icon">🌙</span>
-        <span class="theme-toggle-text">Fondo Oscuro</span>
-      </button>
-
-      <a href="https://pokesurvivor.com" target="_blank" rel="noopener" class="nav-cta-btn">
-        <span>🎮 Jugar PokéSurvivor</span>
+  <header class="landing-header" style="display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:center !important; height:52px !important; min-height:52px !important; max-height:52px !important; width:100% !important; box-sizing:border-box !important; padding:0 24px !important;">
+    <div class="header-inner" style="display:grid !important; grid-template-columns:1fr auto 1fr !important; align-items:center !important; width:100% !important; max-width:1440px !important; margin:0 auto !important; gap:16px !important;">
+      <a href="#home" class="brand-group" style="display:inline-flex !important; flex-direction:row !important; align-items:center !important; gap:9px !important; justify-self:start !important; flex-shrink:0 !important; text-decoration:none !important;" onclick="Analyzer.App.switchTab('home')" title="PokéSurvivor Analyzer">
+        <img src="assets/icons/icon-48.png" alt="PokéSurvivor" class="brand-icon">
+        <div class="brand-text-wrap">
+          <div class="brand-text-title">PokéSurvivor <span class="brand-text-highlight">Analyzer</span></div>
+        </div>
       </a>
-    </nav>
+
+      <!-- Selector de Pestañas Principales (Inicio, Catálogo, Comparador, Partida) -->
+      <nav class="nav-links" style="display:inline-flex !important; flex-direction:row !important; align-items:center !important; justify-self:center !important; flex-wrap:nowrap !important; flex-shrink:0 !important; margin:0 !important; gap:8px !important; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important;" aria-label="Pestañas de navegación">
+        <button class="nav-tab-btn active" data-tab="home" onclick="Analyzer.App.switchTab('home')" title="Inicio">
+          <span class="nav-tab-icon">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </span>
+          <span class="nav-tab-label">Inicio</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="catalog" onclick="Analyzer.App.switchTab('catalog')" title="Catálogo de Pokémon">
+          <span class="nav-tab-icon">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          </span>
+          <span class="nav-tab-label">Catálogo</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="comparison" onclick="Analyzer.App.switchTab('comparison')" title="Comparador Táctico">
+          <span class="nav-tab-icon">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"></polygon><line x1="13" y1="19" x2="19" y2="13"></line><line x1="16" y1="16" x2="20" y2="20"></line><polygon points="9.5 17.5 21 6 21 3 18 3 6.5 14.5"></polygon><line x1="11" y1="19" x2="5" y2="13"></line><line x1="8" y1="16" x2="4" y2="20"></line></svg>
+          </span>
+          <span class="nav-tab-label">Comparador</span>
+          <span class="nav-badge" id="nav-compare-count" style="display:none">0</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="guide" onclick="Analyzer.App.switchTab('guide')" title="Información de Partida">
+          <span class="nav-tab-icon">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          </span>
+          <span class="nav-tab-label">Partida</span>
+        </button>
+      </nav>
+
+      <!-- Botón para jugar a la derecha del todo -->
+      <div class="header-right-action" style="display:inline-flex !important; flex-direction:row !important; align-items:center !important; justify-self:end !important; flex-shrink:0 !important; margin:0 !important;">
+        <a href="https://pokesurvivor.com" target="_blank" rel="noopener" class="nav-cta-btn" style="display:inline-flex !important; flex-direction:row !important; align-items:center !important; white-space:nowrap !important;" title="Jugar a PokéSurvivor en una pestaña nueva">
+          <span class="cta-icon">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"></rect><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line></svg>
+          </span>
+          <span class="cta-text">Jugar PokéSurvivor</span>
+        </a>
+      </div>
+    </div>
   </header>
 
   <!-- ========================================================================= -->
@@ -96,9 +123,8 @@
 
         <div class="hero-actions">
           <button class="hero-btn hero-btn-primary" onclick="Analyzer.App.switchTab('catalog')">
-            <span>🔍 Explorar Catálogo (966)</span>
+            <span><svg class="ui-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Explorar Catálogo (966)</span>
           </button>
-
         </div>
 
         <!-- Barra Resumen en Hero -->
@@ -112,7 +138,7 @@
             <div class="hero-stat-label">Regiones Completas</div>
           </div>
           <div class="hero-stat-card">
-            <div class="hero-stat-num">64</div>
+            <div class="hero-stat-num">72</div>
             <div class="hero-stat-label">Movimientos y Evoluciones</div>
           </div>
           <div class="hero-stat-card">
@@ -135,7 +161,9 @@
 
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon-wrap">📊</div>
+          <div class="feature-icon-wrap">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          </div>
           <h3 class="feature-title">Fórmulas Analíticas Propias</h3>
           <p class="feature-desc">
             Evaluamos Daño Ofensivo, Supervivencia, Movilidad, Control y Rendimiento vs Jefes mediante fórmulas
@@ -144,7 +172,9 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-wrap">⚔️</div>
+          <div class="feature-icon-wrap">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"></polygon><line x1="13" y1="19" x2="19" y2="13"></line><line x1="16" y1="16" x2="20" y2="20"></line><polygon points="9.5 17.5 21 6 21 3 18 3 6.5 14.5"></polygon><line x1="11" y1="19" x2="5" y2="13"></line><line x1="8" y1="16" x2="4" y2="20"></line></svg>
+          </div>
           <h3 class="feature-title">Comparador Multificha</h3>
           <p class="feature-desc">
             Contrasta de 2 a 4 Pokémon simultáneamente con gráficos de radar, efectividades suavizadas de tipos,
@@ -153,7 +183,9 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-wrap">🔍</div>
+          <div class="feature-icon-wrap">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </div>
           <h3 class="feature-title">Buscador y Filtros Multifacéticos</h3>
           <p class="feature-desc">
             Filtra por generación, tipo elemental, roles de combate salvaje (embestidores, a distancia, tanques), o
@@ -162,7 +194,9 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon-wrap">✨</div>
+          <div class="feature-icon-wrap">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3m0 12v3m-9-9h3m12 0h3m-2.6-6.4l-2.1 2.1m-8.6 8.6l-2.1 2.1m0-12.8l2.1 2.1m8.6 8.6l2.1 2.1"></path></svg>
+          </div>
           <h3 class="feature-title">Animaciones y Sprites PMD</h3>
           <p class="feature-desc">
             Visualiza animaciones de caminar, atacar, disparar y recibir daño en las 8 direcciones con soporte para
@@ -213,7 +247,9 @@
           <!-- Fila 1: Campo de Texto y Ordenación -->
           <div class="search-primary-row">
             <div class="search-input-wrap">
-              <span class="search-icon-inside">🔍</span>
+              <span class="search-icon-inside">
+                <svg class="ui-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </span>
               <input type="text" id="search-input" class="search-input"
                 placeholder="Buscar por nombre, número Dex (ej: 025), tipo o movimiento..." autocomplete="off">
             </div>
@@ -240,25 +276,25 @@
 
           <!-- Fila de Orden Rápido por Estadísticas -->
           <div class="quick-sort-row">
-            <span class="quick-sort-label">⚡ Orden Rápido:</span>
+            <span class="quick-sort-label"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Orden Rápido:</span>
             <div class="quick-sort-buttons" id="quick-sort-buttons">
               <button class="quick-sort-btn" data-sort="atk" title="Ordenar por Ataque">
-                <span class="btn-icon">⚔️</span> ATK <span class="sort-indicator"></span>
+                <span class="btn-icon"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"></polyline><line x1="13" y1="19" x2="19" y2="13"></line><line x1="16" y1="16" x2="20" y2="20"></line></svg></span> ATK <span class="sort-indicator"></span>
               </button>
               <button class="quick-sort-btn" data-sort="spd" title="Ordenar por Velocidad">
-                <span class="btn-icon">⚡</span> SPD <span class="sort-indicator"></span>
+                <span class="btn-icon"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span> SPD <span class="sort-indicator"></span>
               </button>
               <button class="quick-sort-btn" data-sort="hp" title="Ordenar por Salud">
-                <span class="btn-icon">❤️</span> HP <span class="sort-indicator"></span>
+                <span class="btn-icon"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg></span> HP <span class="sort-indicator"></span>
               </button>
               <button class="quick-sort-btn" data-sort="bst" title="Ordenar por BST total">
-                <span class="btn-icon">⭐</span> BST <span class="sort-indicator"></span>
+                <span class="btn-icon"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span> BST <span class="sort-indicator"></span>
               </button>
               <button class="quick-sort-btn active" data-sort="dex" title="Ordenar por Número Pokédex">
-                <span class="btn-icon">🔢</span> Dex <span class="sort-indicator">▲</span>
+                <span class="btn-icon"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg></span> Dex <span class="sort-indicator">▲</span>
               </button>
               <button class="quick-sort-btn" data-sort="name" title="Ordenar por Nombre Alfabético">
-                <span class="btn-icon">🔤</span> A-Z <span class="sort-indicator"></span>
+                <span class="btn-icon"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l4-14 4 14"></path><line x1="5.5" y1="14" x2="10.5" y2="14"></line><path d="M15 9h5l-5 10h5"></path></svg></span> A-Z <span class="sort-indicator"></span>
               </button>
             </div>
           </div>
@@ -266,7 +302,7 @@
           <!-- Selector de Regiones -->
           <div class="filter-group-row region-group-row">
             <div class="filter-header-flex">
-              <span class="filter-group-label">🌍 Regiones del Mundo Pokémon:</span>
+              <span class="filter-group-label"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> Regiones del Mundo Pokémon:</span>
               <span class="region-active-badge" id="region-active-badge">Todas las Regiones (966)</span>
             </div>
             <div class="region-nav-bar" id="region-filters">
@@ -285,20 +321,20 @@
           <!-- Sliders de Estadísticas Mínimas -->
           <div class="filter-group-row stat-sliders-row">
             <div class="filter-header-flex">
-              <span class="filter-group-label">📊 Umbrales Mínimos de Estadísticas Reales:</span>
+              <span class="filter-group-label"><svg class="ui-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> Umbrales Mínimos de Estadísticas Reales:</span>
               <button class="btn tiny ghost" id="reset-stats-sliders-btn">Restablecer Umbrales</button>
             </div>
             <div class="stat-sliders-grid">
               <div class="stat-slider-item">
                 <div class="stat-slider-head">
-                  <span>❤️ Salud Mínima:</span>
+                  <span><svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none" style="margin-right:4px"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg> Salud Mínima:</span>
                   <b id="val-min-hp" class="gold">Cualquiera (70+)</b>
                 </div>
                 <input type="range" id="slider-min-hp" min="70" max="185" value="70" step="5" class="stat-range-slider">
               </div>
               <div class="stat-slider-item">
                 <div class="stat-slider-head">
-                  <span>⚔️ Ataque Mínimo:</span>
+                  <span><svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"></polyline><line x1="13" y1="19" x2="19" y2="13"></line><line x1="16" y1="16" x2="20" y2="20"></line></svg> Ataque Mínimo:</span>
                   <b id="val-min-atk" class="gold">Cualquiera (×0.76+)</b>
                 </div>
                 <input type="range" id="slider-min-atk" min="76" max="170" value="76" step="5"
@@ -306,7 +342,7 @@
               </div>
               <div class="stat-slider-item">
                 <div class="stat-slider-head">
-                  <span>⚡ Velocidad Mínima:</span>
+                  <span><svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Velocidad Mínima:</span>
                   <b id="val-min-spd" class="gold">Cualquiera (80+)</b>
                 </div>
                 <input type="range" id="slider-min-spd" min="80" max="162" value="80" step="5"
@@ -336,20 +372,24 @@
             <div class="page-size-selector-wrap">
               <label for="page-size-select">Mostrar:</label>
               <select id="page-size-select" class="field small">
-                <option value="24">24 por pág</option>
-                <option value="36" selected>36 por pág</option>
-                <option value="48">48 por pág</option>
-                <option value="72">72 por pág</option>
-                <option value="96">96 por pág</option>
-                <option value="all">Todos (966)</option>
+                <option value="20">20 por pág</option>
+                <option value="35" selected>35 por pág</option>
+                <option value="50">50 por pág</option>
+                <option value="70">70 por pág</option>
+                <option value="105">105 por pág</option>
+                <option value="all">Todos</option>
               </select>
             </div>
 
             <div class="view-mode-selector">
-              <button class="view-mode-btn active" data-view="cards" title="Vista de tarjetas con sprites">🗂
-                Tarjetas</button>
-              <button class="view-mode-btn" data-view="compact" title="Vista compacta de filas">☰ Compacta</button>
-              <button class="view-mode-btn" data-view="table" title="Vista en tabla de datos">📊 Tabla</button>
+              <button class="view-mode-btn active" data-view="cards" title="Vista de tarjetas con sprites">
+                <svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><rect x="7" y="3" width="14" height="14" rx="2"></rect><path d="M3 7v12a2 2 0 0 0 2 2h12"></path></svg>
+                Tarjetas
+              </button>
+              <button class="view-mode-btn" data-view="table" title="Vista en tabla de datos">
+                <svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+                Tabla
+              </button>
             </div>
           </div>
         </div>
@@ -381,87 +421,198 @@
 
       <section class="pmd-box comparison-container-panel" id="comparison-section">
         <div class="pmd-box-title">
-          <span>Sistema de Comparación de Personajes (2 - 4 Pokémon)</span>
+          <span>Sistema de Comparación y Análisis Táctico (1 - 4 Pokémon)</span>
           <div class="comparison-header-tools">
-            <button class="btn small" id="share-comparison-btn">🔗 Compartir URL</button>
+            <button class="btn small" id="share-comparison-btn">
+              <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              Compartir URL
+            </button>
             <button class="btn small" id="clear-comparison-btn">Vaciar</button>
           </div>
         </div>
 
         <!-- Barra de Presets Rápidos -->
-        <div
-          style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1)">
-          <span style="font-size:13px; color:var(--muted); font-weight:700">⚡ Comparativas Rápidas:</span>
+        <div class="comparison-presets-bar">
+          <span class="comparison-presets-label">
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Comparativas Rápidas:
+          </span>
           <button class="btn tiny"
             onclick="Analyzer.Comparison.setSelection([1, 4, 7]); Analyzer.App.toast('Iniciales de Kanto cargados');">
-            🌱 Iniciales Kanto
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+            Iniciales Kanto
           </button>
           <button class="btn tiny"
             onclick="Analyzer.Comparison.setSelection([152, 155, 158]); Analyzer.App.toast('Iniciales de Johto cargados');">
-            🔥 Iniciales Johto
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+            Iniciales Johto
           </button>
           <button class="btn tiny"
             onclick="Analyzer.Comparison.setSelection([252, 255, 258]); Analyzer.App.toast('Iniciales de Hoenn cargados');">
-            💧 Iniciales Hoenn
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+            Iniciales Hoenn
           </button>
           <button class="btn tiny gold"
             onclick="Analyzer.Comparison.setSelection([150, 249, 384, 493]); Analyzer.App.toast('Cuarteto Legendario cargado');">
-            👑 Legendarios Clave
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none" style="margin-right:4px"><path d="M2 19h20v3H2v-3zm0-13l5 5 5-8 5 8 5-5v11H2V6z"></path></svg>
+            Legendarios Clave
           </button>
           <button class="btn tiny gold"
             onclick="Analyzer.TeamSuggester.generate({size:4}); Analyzer.Comparison.setSelection(Analyzer.TeamSuggester.getCurrentTeam().map(p=>p.dex)); Analyzer.App.toast('¡Escuadra de 4 jugadores sugerida!');">
-            🎲 Sugerir 4 Equilibrados
+            <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="8" cy="8" r="1.5" fill="currentColor"></circle><circle cx="16" cy="8" r="1.5" fill="currentColor"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle><circle cx="8" cy="16" r="1.5" fill="currentColor"></circle><circle cx="16" cy="16" r="1.5" fill="currentColor"></circle></svg>
+            Sugerir 4 Equilibrados
           </button>
-          <button class="btn tiny" onclick="Analyzer.App.switchTab('catalog')" style="margin-left:auto">
+          <button class="btn tiny btn-add-more" onclick="Analyzer.App.switchTab('catalog')">
             + Añadir más desde Catálogo
           </button>
         </div>
 
-        <!-- Gráfico de Radar Central -->
-        <div class="radar-wrapper-box">
-          <div class="charts-row">
-            <div class="chart-panel">
-              <h4 class="chart-panel-title">🕸️ Radar de Rendimiento</h4>
-              <canvas id="comparison-radar-canvas" class="chart-canvas" width="460" height="400"></canvas>
+        <!-- HUB ANALÍTICO MULTIGRÁFICA + PODIO TÁCTICO -->
+        <div class="comparison-analytics-hub" id="comparison-analytics-hub">
+          <!-- Columna Izquierda: 4 Gráficos Tácticos Interactivos -->
+          <div class="comparison-charts-column">
+            <div class="comparison-charts-header">
+              <div class="charts-header-left">
+                <span class="charts-header-badge">
+                  <svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  Matriz Multidimensional
+                </span>
+                <h3 class="comparison-charts-title">Visualización Analítica Comparada</h3>
+              </div>
+              <div class="charts-header-hint">
+                <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                <span>Haz clic en cualquier gráfico para expandirlo</span>
+              </div>
             </div>
-            <div class="chart-panel">
-              <h4 class="chart-panel-title">📊 Barras Comparativas</h4>
-              <canvas id="comparison-bars-canvas" class="chart-canvas" width="460" height="400"></canvas>
+
+            <!-- Leyenda compartida de jugadores/Pokémon -->
+            <div class="radar-legend" id="radar-legend">
+              <!-- Rellenado dinámicamente -->
+            </div>
+
+            <!-- Grilla 2x2 de Gráficos -->
+            <div class="comparison-charts-grid">
+              <!-- Gráfico 1: Radar Táctico -->
+              <div class="comparison-chart-card" data-chart="radar" onclick="Analyzer.App.openExpandedChart('radar')" title="Clic para expandir Radar Hexagonal">
+                <div class="chart-card-head">
+                  <div class="chart-card-title">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon></svg>
+                    <span>Radar Hexagonal Táctico</span>
+                  </div>
+                  <button class="chart-expand-btn" type="button" aria-label="Expandir Radar" onclick="event.stopPropagation(); Analyzer.App.openExpandedChart('radar')">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                    <span>Expandir</span>
+                  </button>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="comparison-radar-canvas" width="440" height="270"></canvas>
+                </div>
+                <div class="chart-card-foot">
+                  <span>6 Dimensiones Tácticas: Ofensiva, Supervivencia, Movilidad, Control, Flexibilidad, Vs Jefes</span>
+                </div>
+              </div>
+
+              <!-- Gráfico 2: Barras Agrupadas de Combate -->
+              <div class="comparison-chart-card" data-chart="bars" onclick="Analyzer.App.openExpandedChart('bars')" title="Clic para expandir Comparativa de Barras">
+                <div class="chart-card-head">
+                  <div class="chart-card-title">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Estadísticas Reales de Combate</span>
+                  </div>
+                  <button class="chart-expand-btn" type="button" aria-label="Expandir Barras" onclick="event.stopPropagation(); Analyzer.App.openExpandedChart('bars')">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                    <span>Expandir</span>
+                  </button>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="comparison-bars-canvas" width="440" height="270"></canvas>
+                </div>
+                <div class="chart-card-foot">
+                  <span>Valores directos de HP, SPD, ATK, PA, SA, DF y SD con escala porcentual</span>
+                </div>
+              </div>
+
+              <!-- Gráfico 3: Torta / Donut de Cuota de Poder -->
+              <div class="comparison-chart-card" data-chart="donut" onclick="Analyzer.App.openExpandedChart('donut')" title="Clic para expandir Distribución de Poder">
+                <div class="chart-card-head">
+                  <div class="chart-card-title">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10z"></path></svg>
+                    <span>Cuota de Poder (Donut / BST)</span>
+                  </div>
+                  <button class="chart-expand-btn" type="button" aria-label="Expandir Donut" onclick="event.stopPropagation(); Analyzer.App.openExpandedChart('donut')">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                    <span>Expandir</span>
+                  </button>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="comparison-donut-canvas" width="440" height="270"></canvas>
+                </div>
+                <div class="chart-card-foot">
+                  <span>Participación porcentual en el BST acumulado y balance de escuadra</span>
+                </div>
+              </div>
+
+              <!-- Gráfico 4: Matriz Cartesiana Táctica (Ofensiva vs Supervivencia) -->
+              <div class="comparison-chart-card" data-chart="matrix" onclick="Analyzer.App.openExpandedChart('matrix')" title="Clic para expandir Matriz de Cuadrantes">
+                <div class="chart-card-head">
+                  <div class="chart-card-title">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+                    <span>Matriz de Posicionamiento Táctico</span>
+                  </div>
+                  <button class="chart-expand-btn" type="button" aria-label="Expandir Matriz" onclick="event.stopPropagation(); Analyzer.App.openExpandedChart('matrix')">
+                    <svg class="ui-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                    <span>Expandir</span>
+                  </button>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="comparison-matrix-canvas" width="440" height="270"></canvas>
+                </div>
+                <div class="chart-card-foot">
+                  <span>Cuadrantes: Glass Cannon, Titán All-Rounder, Muralla y Hostigador</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="radar-legend" id="radar-legend">
-            <!-- Rellenado dinámicamente -->
-          </div>
-          <p class="chart-note">
-            ℹ️ Los gráficos muestran las mismas <b>puntuaciones 0-100</b> del <b>Rendimiento Evaluado</b> de cada ficha
-            (no son las estadísticas base). Por ejemplo, <b>Supervivencia</b> combina HP + resistencias de tipo + hitbox,
-            y <b>Ofensiva</b> combina ATK + DPS + movimientos. Pasa el cursor sobre un punto o barra para ver su valor.
-            <i>Late Game</i> y el <i>Índice Global</i> se ven en las tarjetas inferiores.
-          </p>
-          <div class="radar-axes-guide"
-            style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:10px; font-size:12px; color:var(--muted)">
-            <span style="color:var(--gold); font-weight:700">💡 Dimensiones Evaluadas (Pasa el cursor):</span>
-            <span class="metric-has-tooltip"
-              title="Daño Ofensivo: Multiplicador de ataque base, DPS estimado inicial y repertorio de movimientos agresivos">⚔️
-              Ofensiva <span class="metric-info-icon">ℹ️</span></span>
-            <span class="metric-has-tooltip"
-              title="Supervivencia: Puntos de salud (HP), balance de resistencias vs debilidades e inmunidades, y tamaño reducido de hitbox">🛡️
-              Supervivencia <span class="metric-info-icon">ℹ️</span></span>
-            <span class="metric-has-tooltip"
-              title="Movilidad: Velocidad de desplazamiento base, habilidad de levitar sobre líquidos/lava y acceso a movimientos Dash">⚡
-              Movilidad <span class="metric-info-icon">ℹ️</span></span>
-            <span class="metric-has-tooltip"
-              title="Control: Capacidad para contener hordas masivas (ralentización, proyectiles teledirigidos, minas, daño en área)">🎯
-              Control <span class="metric-info-icon">ℹ️</span></span>
-            <span class="metric-has-tooltip"
-              title="Flexibilidad: Amplitud del catálogo de movimientos aprendibles y variedad de arquetipos ofensivos">🔄
-              Flexibilidad <span class="metric-info-icon">ℹ️</span></span>
-            <span class="metric-has-tooltip"
-              title="Vs Jefes: Daño concentrado (burst), escalado de ataque y alcance a distancia seguro ante élites">👑
-              Vs Jefes <span class="metric-info-icon">ℹ️</span></span>
-            <span class="metric-has-tooltip"
-              title="Late Game: Escalado en oleadas avanzadas (minuto 15+), sinergia de evoluciones doradas y expediciones en Grietas">🌌
-              Late Game <span class="metric-info-icon">ℹ️</span></span>
+
+          <!-- Columna Derecha: Podio Táctico y Ranking por Métrica -->
+          <div class="comparison-podium-column">
+            <div class="podium-card-widget">
+              <div class="podium-widget-header">
+                <div class="podium-title-row">
+                  <span class="podium-trophy-icon">🏆</span>
+                  <div>
+                    <h3 class="podium-widget-title">Podio Táctico</h3>
+                    <p class="podium-widget-sub">Ranking en vivo entre los Pokémon comparados</p>
+                  </div>
+                </div>
+
+                <div class="podium-metric-control">
+                  <label for="podium-metric-select" class="podium-metric-label">Evaluar por estadística:</label>
+                  <select id="podium-metric-select" class="field small podium-select">
+                    <option value="overall" selected>⭐ Rendimiento Global (Overall)</option>
+                    <option value="hp">❤️ Salud Base (HP)</option>
+                    <option value="atk">⚔️ Ataque Dominante (ATK)</option>
+                    <option value="pa">🥊 Ataque Físico (PA)</option>
+                    <option value="sa">🔮 Ataque Especial (SA)</option>
+                    <option value="def">🛡️ Defensas Totales (DF + SD)</option>
+                    <option value="spd">⚡ Velocidad (SPD)</option>
+                    <option value="bst">📊 Total Base (BST)</option>
+                    <option value="boss">👑 Eficacia Vs Jefes</option>
+                    <option value="control">🌀 Control de Hordas</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Escenario del Podio (1º, 2º, 3º escalonados y 4º si aplica) -->
+              <div class="podium-stage-container" id="comparison-podium-stage">
+                <!-- Rellenado dinámicamente -->
+              </div>
+
+              <!-- Lista de Clasificación Detallada -->
+              <div class="podium-ranking-list" id="comparison-podium-list">
+                <!-- Rellenado dinámicamente -->
+              </div>
+            </div>
           </div>
         </div>
 
@@ -474,23 +625,90 @@
     </main>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- VISTA 4: INTELIGENCIA DE PARTIDA, EVENTOS Y CLÍMAX DE ARCEUS              -->
+  <!-- ========================================================================= -->
+  <div class="app-view-panel" id="view-guide">
+    <main class="analyzer-main-container">
+      <div class="guide-container" id="guide-container">
+        <!-- Generado dinámicamente por Analyzer.GameGuide.render() -->
+      </div>
+    </main>
+  </div>
+
   <!-- ==================== Bandeja Inferior Flotante (Sticky Tray) ==================== -->
-  <aside class="comparison-tray hidden" id="comparison-tray">
-    <div class="tray-items" id="tray-items">
-      <!-- 4 ranuras de selección -->
+  <aside class="comparison-tray hidden" id="comparison-tray" aria-label="Bandeja de Pokémon para comparar">
+    <div class="tray-content">
+      <div class="tray-items" id="tray-items">
+        <!-- 4 ranuras de selección -->
+      </div>
+      <div class="tray-actions">
+        <button class="btn gold tray-compare-btn" id="tray-compare-btn">Comparar (0/4)</button>
+        <button class="btn small ghost tray-clear-btn" id="tray-clear-btn" title="Limpiar selección">Vaciar</button>
+      </div>
     </div>
-    <div style="display:flex; gap:8px">
-      <button class="btn gold" id="tray-compare-btn">Comparar (0/4)</button>
-      <button class="btn small ghost" id="tray-clear-btn" title="Limpiar bandeja">Vaciar</button>
-    </div>
+  </aside>
+
+  <!-- ==================== Burbuja Flotante para Cambiar Color (FAB) ==================== -->
+  <aside class="floating-theme-widget" id="floating-theme-widget" aria-label="Control flotante de tema"
+    style="position:fixed !important; bottom:26px !important; right:26px !important; z-index:99999 !important; display:flex !important; align-items:center !important; justify-content:center !important;">
+    <button class="theme-bubble-btn theme-toggle-btn theme-fab-btn" id="theme-toggle-btn" type="button" aria-label="Cambiar tema de color"
+      title="Alternar entre Modo Oscuro y Modo Claro"
+      style="width:52px !important; height:52px !important; min-width:52px !important; min-height:52px !important; border-radius:50% !important; display:flex !important; align-items:center !important; justify-content:center !important; cursor:pointer !important;">
+      <span class="theme-toggle-icon">
+        <svg class="theme-svg theme-svg-moon ui-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </span>
+      <span class="theme-bubble-tooltip">Cambiar Color</span>
+    </button>
+    <button class="theme-bubble-dismiss theme-fab-dismiss" id="theme-fab-dismiss" type="button" aria-label="Quitar burbuja de la pantalla" title="Quitar burbuja de la pantalla"
+      style="position:absolute !important; top:-4px !important; right:-4px !important; width:20px !important; height:20px !important; border-radius:50% !important; cursor:pointer !important; display:flex !important; align-items:center !important; justify-content:center !important;">
+      <svg class="ui-icon-svg" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
   </aside>
 
   <!-- ==================== Modal Ficha Completa (Dossier) ==================== -->
   <div class="modal-overlay hidden" id="dossier-modal">
     <div class="pmd-box dossier-box-container">
-      <button class="modal-close-btn" id="modal-close-btn" title="Cerrar ficha">×</button>
+      <button class="modal-close-btn" id="modal-close-btn" title="Cerrar ficha" aria-label="Cerrar ficha">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
       <div id="modal-body-content">
         <!-- Contenido generado por Analyzer.App.openModal(dex) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Modal Escalado de Movimientos (Nivel 1 a 5 y Evolución) ==================== -->
+  <div class="modal-overlay hidden" id="move-scaling-modal" style="z-index:1100">
+    <div class="pmd-box scaling-modal-container scaling-modal-card">
+      <button class="modal-close-btn" id="scaling-modal-close-btn" title="Cerrar escalado" aria-label="Cerrar escalado">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <div id="scaling-modal-content">
+        <!-- Contenido generado por Analyzer.App.openMoveScalingModal(moveId, dex) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Modal Gráfico Expandido (Lightbox de Alta Resolución) ==================== -->
+  <div class="modal-overlay hidden" id="chart-expand-modal" style="z-index:100000 !important">
+    <div class="pmd-box chart-expand-modal-box">
+      <div class="pmd-box-title">
+        <span id="chart-expand-title">Gráfico Táctico Expandido</span>
+        <div style="display:flex; align-items:center; gap:8px">
+          <button class="modal-close-btn" id="chart-expand-close-btn" title="Cerrar vista expandida" aria-label="Cerrar vista expandida">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+      <p class="chart-expand-sub" id="chart-expand-desc">
+        Vista detallada en alta resolución para análisis estratégico profundo. Pasa el cursor sobre los datos para ver detalles.
+      </p>
+      <div class="chart-expand-canvas-holder">
+        <canvas id="comparison-expanded-canvas" width="860" height="480"></canvas>
+      </div>
+      <div class="chart-expand-footer-legend" id="chart-expand-legend">
+        <!-- Rellenado dinámicamente -->
       </div>
     </div>
   </div>
@@ -504,10 +722,12 @@
       <div style="font-weight:700; color:#fff; font-size:16px; margin-bottom:6px">PokéSurvivor Character Analyzer</div>
       <div>Herramienta no oficial de análisis de personajes creada por y para la comunidad.</div>
       <div class="footer-links">
-        <a href="#home" onclick="Analyzer.App.switchTab('home')">Inicio & Dashboard</a>
+        <a href="#home" onclick="Analyzer.App.switchTab('home')">Inicio</a>
         <a href="#catalog" onclick="Analyzer.App.switchTab('catalog')">Catálogo</a>
         <a href="#comparison" onclick="Analyzer.App.switchTab('comparison')">Comparador</a>
+        <a href="#guide" onclick="Analyzer.App.switchTab('guide')">Partida</a>
         <a href="https://pokesurvivor.com" target="_blank" rel="noopener">Juego Oficial PokéSurvivor</a>
+        <a href="#" class="restore-theme-fab-link" id="theme-restore-link" onclick="event.preventDefault(); Analyzer.Theme.restoreFab()" title="Volver a mostrar el botón flotante de tema">Restaurar botón de tema</a>
       </div>
       <div class="footer-disclaimer">
         Pokémon y Pokémon Mystery Dungeon son marcas registradas de Nintendo, Game Freak y The Pokémon Company.<br>
@@ -527,6 +747,7 @@
   <script src="js/data/types.js"></script>
   <script src="js/data/upgrades.js"></script>
   <script src="js/data/items.js"></script>
+  <script src="js/systems/stats.js"></script>
 
   <!-- 2. Núcleo Gráfico con Fallback Inteligente (Local -> Repo -> CDN) -->
   <script src="js/core/sprites.js"></script>
@@ -534,16 +755,18 @@
   <script src="js/ui/ui.js"></script>
 
   <!-- 3. Módulos del PokéSurvivor Character Analyzer -->
-  <script src="js/data-adapter.js"></script>
-  <script src="js/charts.js"></script>
+  <script src="js/data-adapter.js?v=3.5"></script>
+  <script src="js/charts.js?v=3.5"></script>
   <script src="js/filters.js"></script>
-  <script src="js/comparison.js"></script>
+  <script src="js/comparison.js?v=3.5"></script>
   <script src="js/dungeon-bg.js"></script>
-  <script src="js/theme.js"></script>
-  <script src="js/team-suggester.js"></script>
-  <script src="js/dashboard.js"></script>
+  <script src="js/theme.js?v=3.5"></script>
+  <script src="js/team-suggester.js?v=3.5"></script>
+  <script src="js/dashboard.js?v=3.5"></script>
   <script src="js/loadout.js"></script>
-  <script src="js/character-analyzer.js"></script>
+  <script src="js/builds.js"></script>
+  <script src="js/game-guide.js?v=3.5"></script>
+  <script src="js/character-analyzer.js?v=3.5"></script>
 </body>
 
 </html>

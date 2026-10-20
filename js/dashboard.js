@@ -120,9 +120,11 @@ Analyzer.Dashboard = (() => {
 
       <!-- ==================== Rankings de Líderes (4 Columnas) ==================== -->
       <section class="dashboard-section">
+      <!-- ==================== Rankings de Líderes (4 Columnas) ==================== -->
+      <section class="dashboard-section">
         <div class="section-header-compact">
           <span class="section-tag">Metajuego de PokéSurvivor</span>
-          <h2 class="section-title-compact">🏆 Rankings de Élite por Dimensión de Combate</h2>
+          <h2 class="section-title-compact">${Analyzer.Icons.get('trophy', { size: 20 })} Rankings de Élite por Dimensión de Combate</h2>
           <p class="section-desc-compact">
             Los líderes indiscutibles según las variables matemáticas del motor. Pulsa <b>+ Comparar</b> para cargarlos directamente en el comparador táctico.
           </p>
@@ -132,7 +134,7 @@ Analyzer.Dashboard = (() => {
           <!-- Columna 1: Daño Ofensivo -->
           <div class="ranking-column pmd-box">
             <div class="ranking-header">
-              <span class="ranking-icon">⚔️</span>
+              <span class="ranking-icon">${Analyzer.Icons.get('sword', { size: 18 })}</span>
               <div>
                 <h3 class="ranking-title">Reyes del Daño</h3>
                 <div class="ranking-subtitle">Mayor Multiplicador ATK</div>
@@ -146,7 +148,7 @@ Analyzer.Dashboard = (() => {
           <!-- Columna 2: Supervivencia / Tanques -->
           <div class="ranking-column pmd-box">
             <div class="ranking-header">
-              <span class="ranking-icon">❤️</span>
+              <span class="ranking-icon">${Analyzer.Icons.get('heart', { size: 18 })}</span>
               <div>
                 <h3 class="ranking-title">Colosos de Salud</h3>
                 <div class="ranking-subtitle">Mayor HP Máximo</div>
@@ -160,7 +162,7 @@ Analyzer.Dashboard = (() => {
           <!-- Columna 3: Velocidad / Movilidad -->
           <div class="ranking-column pmd-box">
             <div class="ranking-header">
-              <span class="ranking-icon">⚡</span>
+              <span class="ranking-icon">${Analyzer.Icons.get('zap', { size: 18 })}</span>
               <div>
                 <h3 class="ranking-title">Velocistas Extremos</h3>
                 <div class="ranking-subtitle">Mayor Agilidad SPD</div>
@@ -174,10 +176,10 @@ Analyzer.Dashboard = (() => {
           <!-- Columna 4: Rendimiento Global -->
           <div class="ranking-column pmd-box">
             <div class="ranking-header">
-              <span class="ranking-icon">👑</span>
+              <span class="ranking-icon">${Analyzer.Icons.get('crown', { size: 18 })}</span>
               <div>
                 <h3 class="ranking-title">Élite Global</h3>
-                <div class="ranking-subtitle metric-has-tooltip" title="Puntuación ponderada global calculada a partir de las 6 dimensiones tácticas clave: Ofensiva, Supervivencia, Movilidad, Control, Flexibilidad y Jefes. Pasa el cursor para ver el desglose en cada Pokémon.">Mayor Score Balanceado <span class="metric-info-icon" style="font-size:11px">ℹ️</span></div>
+                <div class="ranking-subtitle metric-has-tooltip" title="Puntuación ponderada global calculada a partir de las 6 dimensiones tácticas clave: Ofensiva, Supervivencia, Movilidad, Control, Flexibilidad y Jefes. Pasa el cursor para ver el desglose en cada Pokémon.">Mayor Score Balanceado <span class="metric-info-icon" style="font-size:11px">${Analyzer.Icons.get('info', { size: 11 })}</span></div>
               </div>
             </div>
             <div class="ranking-list">
@@ -191,7 +193,7 @@ Analyzer.Dashboard = (() => {
       <section class="dashboard-section">
         <div class="section-header-compact">
           <span class="section-tag">Análisis Geográfico</span>
-          <h2 class="section-title-compact">🌍 Comparativa Estadística por Generación</h2>
+          <h2 class="section-title-compact">${Analyzer.Icons.get('globe', { size: 20 })} Comparativa Estadística por Generación</h2>
           <p class="section-desc-compact">
             Densidad de personajes, promedio de estadísticas y los líderes legendarios de cada región.
           </p>
@@ -223,8 +225,8 @@ Analyzer.Dashboard = (() => {
                     </div>
                   </div>
                   <div class="region-metrics-mini">
-                    <span>❤️ HP: <b>${reg.avgHp}</b></span>
-                    <span>⚔️ ATK: <b>×${reg.avgAtk}</b></span>
+                    <span>${Analyzer.Icons.get('heart', { size: 12 })} HP: <b>${reg.avgHp}</b></span>
+                    <span>${Analyzer.Icons.get('sword', { size: 12 })} ATK: <b>×${reg.avgAtk}</b></span>
                   </div>
                 </div>
 
@@ -232,7 +234,7 @@ Analyzer.Dashboard = (() => {
                   <div class="region-boss-row">
                     <span style="color:var(--muted); font-size:12px">Mayor BST:</span>
                     <span class="gold" style="font-weight:700; cursor:pointer" onclick="Analyzer.App.openModal(${reg.topPoke.dex})">
-                      ${reg.topPoke.name} (${reg.topPoke.bst} BST) 🔍
+                      ${reg.topPoke.name} (${reg.topPoke.bst} BST) ${Analyzer.Icons.get('search', { size: 12 })}
                     </span>
                   </div>
                 ` : ''}
@@ -251,10 +253,10 @@ Analyzer.Dashboard = (() => {
           </p>
           <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
             <button class="btn gold" style="font-size:16px; padding:10px 20px" onclick="Analyzer.App.switchTab('catalog')">
-              🗂 Ir al Catálogo de Personajes (966)
+              ${Analyzer.Icons.get('catalog', { size: 16 })} Ir al Catálogo de Personajes (966)
             </button>
             <button class="btn" style="font-size:16px; padding:10px 20px" onclick="Analyzer.App.switchTab('comparison')">
-              ⚔️ Abrir Comparador Táctico
+              ${Analyzer.Icons.get('swords', { size: 16 })} Abrir Comparador Táctico
             </button>
           </div>
         </div>
@@ -266,7 +268,7 @@ Analyzer.Dashboard = (() => {
   }
 
   function renderRankItem(p, index, statValue, statLabel) {
-    const medals = ['🥇', '🥈', '🥉', '4º', '5º'];
+    const medals = ['#1', '#2', '#3', '#4', '#5'];
     const dex3 = String(p.dex).padStart(3, '0');
     const typeBadges = p.types.map(t => {
       const col = (window.G && G.U && G.U.TYPE_COLOR && G.U.TYPE_COLOR[t]) || '#666';
