@@ -212,7 +212,7 @@ Analyzer.Comparison = (() => {
    * Calcula todas las deltas comparativas para un Pokémon respecto al primero
    */
   function getPokemonDeltas(pokemon, referencePokemon) {
-    if (!pokemon || !referencePokemon || pokemon.dex === referencePokemon.dex) {
+    if (!pokemon || !referencePokemon || (pokemon === referencePokemon)) {
       return null;
     }
 
@@ -329,8 +329,9 @@ Analyzer.Comparison = (() => {
    * Exporta la tabla de comparación actual a un archivo CSV descargable
    */
   function exportToCsv() {
-    const list = getSelected();
-    if (list.length === 0) return false;
+    const rawList = getSelected();
+    if (rawList.length === 0) return false;
+    const list = rawList.map(p => (window.Analyzer && Analyzer.Loadout ? Analyzer.Loadout.effective(p) : p));
 
     const headers = [
       'Nº Pokédex',

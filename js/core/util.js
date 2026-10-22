@@ -1,5 +1,6 @@
 /* ============ util.js — helpers compartidos ============ */
 window.G = window.G || {};
+window.G.DB = window.G.DB || { save: null };
 
 /** Altura a la que vuelan proyectiles y efectos sobre el plano del suelo. */
 G.LIFT = 18;

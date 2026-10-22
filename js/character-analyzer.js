@@ -69,6 +69,7 @@ Analyzer.App = (() => {
   let modalAnim = 'Idle';
   let modalDir = 0;
   let modalUpgradesSimulated = false;
+  let modalSelectedNatureId = null;
   let activeTab = 'home'; // 'home' | 'catalog' | 'comparison'
 
   // Bucle de animación para sprites activos en canvas
@@ -1720,16 +1721,40 @@ Analyzer.App = (() => {
 
     // 5. Renderizar Columnas de Comparación Alineadas
     const container = document.getElementById('comparison-content');
-    const basePokemon = selectedList[0];
+    const baseEffP = chartList[0];
     const metricDefs = Analyzer.DataAdapter.getMetricDefinitions();
 
     let colsHtml = `<div class="comparison-columns count-${selectedList.length}">`;
 
     selectedList.forEach((p, idx) => {
       const isBase = idx === 0;
+      const effP = chartList[idx] || Analyzer.Loadout.effective(p);
       const col = Analyzer.Charts.COMPARISON_COLORS[idx % Analyzer.Charts.COMPARISON_COLORS.length];
-      const deltas = isBase ? null : Analyzer.Comparison.getPokemonDeltas(p, basePokemon);
-      const { strengths, limitations } = Analyzer.Comparison.evaluateStrengthsAndLimitations(p);
+      const deltas = isBase ? null : Analyzer.Comparison.getPokemonDeltas(effP, baseEffP);
+      const { strengths, limitations } = Analyzer.Comparison.evaluateStrengthsAndLimitations(effP);
+
+      const nat = effP.effectiveNature;
+      const item = effP.effectiveItem;
+      let paBadge = nat && nat.up === 'pa' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (nat && nat.down === 'pa' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+      let saBadge = nat && nat.up === 'sa' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (nat && nat.down === 'sa' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+      let dfBadge = nat && nat.up === 'df' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (nat && nat.down === 'df' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+      let sdBadge = nat && nat.up === 'sd' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (nat && nat.down === 'sd' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+      let spdBadge = nat && nat.up === 'spd' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (nat && nat.down === 'spd' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+
+      if (item) {
+        if (item.id === 'choiceband') {
+          paBadge += ' <span class="nat-mod-badge item-badge">+40% Objeto</span>';
+          saBadge += ' <span class="nat-mod-badge item-badge">+40% Objeto</span>';
+        } else if (item.id === 'lifeorb') {
+          paBadge += ' <span class="nat-mod-badge item-badge">+30% Objeto</span>';
+          saBadge += ' <span class="nat-mod-badge item-badge">+30% Objeto</span>';
+        } else if (item.id === 'choicescarf') {
+          spdBadge += ' <span class="nat-mod-badge item-badge">+35% Objeto</span>';
+        } else if (item.id === 'assaultvest') {
+          dfBadge += ' <span class="nat-mod-badge item-badge">-20% Daño</span>';
+          sdBadge += ' <span class="nat-mod-badge item-badge">-20% Daño</span>';
+        }
+      }
 
       const typesHtml = p.types.map(t =>
         `<span class="type-pill" style="background:${G.U.TYPE_COLOR[t]}">${G.U.TYPE_NAME[t] || t}</span>`
@@ -1741,29 +1766,39 @@ Analyzer.App = (() => {
             <button class="comp-remove-btn" onclick="Analyzer.Comparison.remove(${p.dex})" title="Quitar de la comparación">×</button>
             <canvas class="comp-sprite-cv" data-dex="${p.dex}" width="96" height="90"></canvas>
             <h3 class="comp-name">${p.name}</h3>
+            <div class="comp-build-badge">
+              <span class="badge-nature" title="Naturaleza / Menta activa">${nat ? nat.name : 'Neutra'}</span>
+              ${item ? `<span class="badge-item" title="Objeto equipado">${item.name}</span>` : ''}
+            </div>
             <div class="comp-dex-meta">#${String(p.dex).padStart(3, '0')} · Gen ${p.gen} (${p.genName})</div>
             <div class="comp-types" style="margin:6px 0">${typesHtml}</div>
             <div class="comp-rarity">${G.UI.stars(p.rarity, 14)} <small>${p.availability.rarityName}</small></div>
             <button class="btn small" style="margin-top:6px" onclick="Analyzer.App.openModal(${p.dex})">Ver Ficha Completa</button>
           </div>
 
-          <!-- Estadísticas Base con Deltas -->
-          <div class="comp-section">
-            <h4>Estadísticas de Juego</h4>
-            ${Analyzer.Charts.renderStatBar('Vida (HP)', p.hp, 185, p.hp, deltas ? deltas.hp : null, col.stroke)}
-            ${Analyzer.Charts.renderStatBar('Velocidad (Spd)', p.spd, 162, p.spd, deltas ? deltas.spd : null, col.stroke)}
-            ${Analyzer.Charts.renderStatBar('Ataque Dominante (ATK)', p.atk, 1.70, '×' + p.atk.toFixed(2) + ' (' + p.sideName + ')', deltas ? deltas.atk : null, col.stroke)}
-            ${Analyzer.Charts.renderStatBar('Ataque Físico (PA)', p.pa, 1.70, '×' + p.pa.toFixed(2), deltas ? deltas.pa : null, '#ff7043')}
-            ${Analyzer.Charts.renderStatBar('Ataque Especial (SA)', p.sa, 1.70, '×' + p.sa.toFixed(2), deltas ? deltas.sa : null, '#ab47bc')}
-            ${Analyzer.Charts.renderStatBar('Defensa Física (DF)', p.df, 230, p.df + ' (' + (p.mitigationPhysical >= 0 ? '+' : '') + p.mitigationPhysical + '%)', deltas ? deltas.df : null, '#ffb74d')}
-            ${Analyzer.Charts.renderStatBar('Defensa Especial (SD)', p.sd, 230, p.sd + ' (' + (p.mitigationSpecial >= 0 ? '+' : '') + p.mitigationSpecial + '%)', deltas ? deltas.sd : null, '#4dd0e1')}
-            ${Analyzer.Charts.renderStatBar('Total Base (BST)', p.bst, 720, p.bst, deltas ? deltas.bst : null, col.stroke)}
+          <!-- Build: Naturaleza y Objeto equipado con cambio rápido -->
+          <div class="comp-section item-section">
+            <div class="comp-section-header-flex">
+              <h4>Build: Naturaleza y Objeto</h4>
+              <span class="comp-effective-badge" title="Cambia la Menta o el Objeto para ver las diferencias inmediatamente">1-Click / En Vivo</span>
+            </div>
+            ${Analyzer.Loadout.renderPanel(p, { showNature: true })}
           </div>
 
-          <!-- Objeto equipado y comparativa de mejoras -->
-          <div class="comp-section item-section">
-            <h4>Objeto y Mejora de Estadísticas</h4>
-            ${Analyzer.Loadout.renderPanel(p)}
+          <!-- Estadísticas Efectivas con Deltas -->
+          <div class="comp-section">
+            <div class="comp-section-header-flex">
+              <h4>Estadísticas de Juego Efectivas</h4>
+              <span class="comp-effective-badge" title="Estadísticas calculadas en vivo con la Naturaleza y el Objeto seleccionados">Deltas vs Ref</span>
+            </div>
+            ${Analyzer.Charts.renderStatBar('Vida (HP)', effP.hp, 185, Math.round(effP.hp), deltas ? deltas.hp : null, col.stroke)}
+            ${Analyzer.Charts.renderStatBar('Velocidad (Spd)', Math.round(effP.spd), 162, Math.round(effP.spd) + spdBadge, deltas ? deltas.spd : null, col.stroke)}
+            ${Analyzer.Charts.renderStatBar('Ataque Dominante (ATK)', effP.atk, 1.70, '×' + effP.atk.toFixed(2) + ' (' + p.sideName + ')', deltas ? deltas.atk : null, col.stroke)}
+            ${Analyzer.Charts.renderStatBar('Ataque Físico (PA)', effP.pa, 1.70, '×' + effP.pa.toFixed(2) + paBadge, deltas ? deltas.pa : null, '#ff7043')}
+            ${Analyzer.Charts.renderStatBar('Ataque Especial (SA)', effP.sa, 1.70, '×' + effP.sa.toFixed(2) + saBadge, deltas ? deltas.sa : null, '#ab47bc')}
+            ${Analyzer.Charts.renderStatBar('Defensa Física (DF)', effP.df, 230, effP.df + dfBadge + ' (' + (effP.mitigationPhysical >= 0 ? '+' : '') + effP.mitigationPhysical + '%)', deltas ? deltas.df : null, '#ffb74d')}
+            ${Analyzer.Charts.renderStatBar('Defensa Especial (SD)', effP.sd, 230, effP.sd + sdBadge + ' (' + (effP.mitigationSpecial >= 0 ? '+' : '') + effP.mitigationSpecial + '%)', deltas ? deltas.sd : null, '#4dd0e1')}
+            ${Analyzer.Charts.renderStatBar('Total Base (BST)', effP.bst, 720, effP.bst, deltas ? deltas.bst : null, col.stroke)}
           </div>
 
           <!-- Ataques del Pokémon -->
@@ -1814,36 +1849,36 @@ Analyzer.App = (() => {
             <div class="comp-score-grid">
               <div class="comp-score-item metric-has-tooltip" title="${metricDefs.offensive.name}: ${metricDefs.offensive.fullDesc}">
                 <span class="lbl"><span class="perf-ico">${metricDefs.offensive.icon}</span> Ofensiva <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-                <span class="val">${p.performance.offensive}</span>
+                <span class="val">${effP.performance.offensive}</span>
               </div>
               <div class="comp-score-item metric-has-tooltip" title="${metricDefs.survival.name}: ${metricDefs.survival.fullDesc}">
                 <span class="lbl"><span class="perf-ico">${metricDefs.survival.icon}</span> Supervivencia <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-                <span class="val">${p.performance.survival}</span>
+                <span class="val">${effP.performance.survival}</span>
               </div>
               <div class="comp-score-item metric-has-tooltip" title="${metricDefs.mobility.name}: ${metricDefs.mobility.fullDesc}">
                 <span class="lbl"><span class="perf-ico">${metricDefs.mobility.icon}</span> Movilidad <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-                <span class="val">${p.performance.mobility}</span>
+                <span class="val">${effP.performance.mobility}</span>
               </div>
               <div class="comp-score-item metric-has-tooltip" title="${metricDefs.control.name}: ${metricDefs.control.fullDesc}">
                 <span class="lbl"><span class="perf-ico">${metricDefs.control.icon}</span> Control <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-                <span class="val">${p.performance.control}</span>
+                <span class="val">${effP.performance.control}</span>
               </div>
               <div class="comp-score-item metric-has-tooltip" title="${metricDefs.flexibility.name}: ${metricDefs.flexibility.fullDesc}">
                 <span class="lbl"><span class="perf-ico">${metricDefs.flexibility.icon}</span> Flexibilidad <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-                <span class="val">${p.performance.flexibility}</span>
+                <span class="val">${effP.performance.flexibility}</span>
               </div>
               <div class="comp-score-item metric-has-tooltip" title="${metricDefs.boss.name}: ${metricDefs.boss.fullDesc}">
                 <span class="lbl"><span class="perf-ico">${metricDefs.boss.icon}</span> Vs Jefes <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-                <span class="val">${p.performance.boss}</span>
+                <span class="val">${effP.performance.boss}</span>
               </div>
               <div class="comp-score-item metric-has-tooltip" title="${metricDefs.lateGame.name}: ${metricDefs.lateGame.fullDesc}">
                 <span class="lbl"><span class="perf-ico">${metricDefs.lateGame.icon}</span> Late Game <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-                <span class="val">${p.performance.lateGame}</span>
+                <span class="val">${effP.performance.lateGame}</span>
               </div>
             </div>
             <div class="comp-overall-badge metric-has-tooltip" title="${metricDefs.overall.name}: ${metricDefs.overall.fullDesc}">
               <span><span class="perf-ico">${metricDefs.overall.icon}</span> Índice Global <span class="metric-info-icon">${Analyzer.Icons.get('info', { size: 11 })}</span>:</span>
-              <b>${p.performance.overall} / 100</b>
+              <b>${effP.performance.overall} / 100</b>
             </div>
           </div>
 
@@ -1989,6 +2024,9 @@ Analyzer.App = (() => {
     modalAnim = 'Idle';
     modalDir = 0;
     modalUpgradesSimulated = false;
+    modalSelectedNatureId = (Analyzer.Loadout && Analyzer.Loadout.getNature)
+      ? Analyzer.Loadout.getNature(dex, (p.natureInfo && p.natureInfo.assigned) ? p.natureInfo.assigned.id : (p.nature || 'hardy'))
+      : ((p.natureInfo && p.natureInfo.assigned) ? p.natureInfo.assigned.id : (p.nature || 'hardy'));
 
     renderModalContent(p);
     elModal.classList.remove('hidden');
@@ -2000,7 +2038,23 @@ Analyzer.App = (() => {
     elModal.classList.add('hidden');
     document.body.style.overflow = '';
     currentModalDex = null;
+    modalSelectedNatureId = null;
     playSfx('back');
+  }
+
+  /**
+   * Cambia la naturaleza activa en el simulador de Menta del modal
+   */
+  function onNatureChange(natureId) {
+    if (!currentModalDex) return;
+    const p = Analyzer.DataAdapter.getByDex(currentModalDex);
+    if (!p) return;
+    modalSelectedNatureId = natureId;
+    if (Analyzer.Loadout && Analyzer.Loadout.setNature) {
+      Analyzer.Loadout.setNature(currentModalDex, natureId);
+    }
+    renderModalContent(p);
+    playSfx('select');
   }
 
   /**
@@ -2066,18 +2120,58 @@ Analyzer.App = (() => {
       `;
     }).join('');
 
-    // Stats ajustados si el simulador de mejoras está activo
-    const effectiveHp = modalUpgradesSimulated ? p.hp + 80 : p.hp; // +8 vida * 10 niveles = +80
-    const effectiveAtk = modalUpgradesSimulated ? p.atk * 1.40 : p.atk; // +4% daño * 10 = +40%
-    const effectiveSpd = modalUpgradesSimulated ? p.spd * 1.24 : p.spd; // +3% spd * 8 = +24%
+    // Naturaleza activa (por defecto la asignada al Pokémon o la seleccionada en el simulador)
+    const activeNature = (G.NATURE_BY && G.NATURE_BY[modalSelectedNatureId]) || (p.natureInfo && p.natureInfo.assigned) || null;
+
+    let natModPa = 1.0, natModSa = 1.0, natModDf = 1.0, natModSd = 1.0, natModSpd = 1.0;
+    if (activeNature) {
+      if (activeNature.up === 'pa') natModPa = 1.1;
+      else if (activeNature.up === 'sa') natModSa = 1.1;
+      else if (activeNature.up === 'df') natModDf = 1.1;
+      else if (activeNature.up === 'sd') natModSd = 1.1;
+      else if (activeNature.up === 'spd') natModSpd = 1.1;
+
+      if (activeNature.down === 'pa') natModPa = 0.9;
+      else if (activeNature.down === 'sa') natModSa = 0.9;
+      else if (activeNature.down === 'df') natModDf = 0.9;
+      else if (activeNature.down === 'sd') natModSd = 0.9;
+      else if (activeNature.down === 'spd') natModSpd = 0.9;
+    }
+
+    let effectivePa = p.pa * natModPa;
+    let effectiveSa = p.sa * natModSa;
+    let effectiveDf = Math.round(p.df * natModDf);
+    let effectiveSd = Math.round(p.sd * natModSd);
+    let effectiveSpd = p.spd * natModSpd;
+    let effectiveHp = p.hp;
+
+    if (modalUpgradesSimulated) {
+      effectiveHp += 80; // +8 vida * 10 niveles = +80
+      effectivePa *= 1.40; // +4% daño * 10 = +40%
+      effectiveSa *= 1.40;
+      effectiveSpd *= 1.24; // +3% spd * 8 = +24%
+    }
+    const effectiveAtk = Math.max(effectivePa, effectiveSa);
+
+    const effTakenPhys = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken({ df: effectiveDf }, 'physical') : p.takenPhysical;
+    const effTakenSpec = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken({ sd: effectiveSd }, 'special') : p.takenSpecial;
+    const effMitPhys = Math.round((1 - effTakenPhys) * 100);
+    const effMitSpec = Math.round((1 - effTakenSpec) * 100);
+
+    const paNatBadge = activeNature && activeNature.up === 'pa' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (activeNature && activeNature.down === 'pa' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+    const saNatBadge = activeNature && activeNature.up === 'sa' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (activeNature && activeNature.down === 'sa' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+    const dfNatBadge = activeNature && activeNature.up === 'df' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (activeNature && activeNature.down === 'df' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+    const sdNatBadge = activeNature && activeNature.up === 'sd' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (activeNature && activeNature.down === 'sd' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
+    const spdNatBadge = activeNature && activeNature.up === 'spd' ? ' <span class="nat-mod-badge up">+10% Menta</span>' : (activeNature && activeNature.down === 'spd' ? ' <span class="nat-mod-badge down">-10% Menta</span>' : '');
 
     // Chips de tipo
     const typesHtml = p.types.map(t =>
       `<span class="type-pill" style="background:${G.U.TYPE_COLOR[t]}">${G.U.TYPE_NAME[t] || t}</span>`
     ).join(' ');
 
-    // Tabla de movimientos aprendibles
-    const movesRows = p.moves.poolMoves.map(m => {
+    // Tabla de movimientos base naturales de subida de nivel
+    const naturalMovesList = (p.moves && p.moves.naturalMoves) ? p.moves.naturalMoves : p.moves.poolMoves;
+    const naturalMovesRows = naturalMovesList.map(m => {
       const evoInfo = m.evolution
         ? `<span class="gold" title="Requiere stat: ${m.evolution.statName}">${Analyzer.Icons.get('crown', { size: 11 })} Evoluciona a <b>${m.evolution.newName}</b></span>`
         : '<span style="color:var(--muted)">-</span>';
@@ -2234,7 +2328,7 @@ Analyzer.App = (() => {
             <!-- Objeto equipado: comparativa de mejoras -->
             <div class="dossier-box item-section">
               <h4>Objeto Equipado y Mejora de Estadísticas</h4>
-              ${Analyzer.Loadout.renderPanel(p)}
+              ${Analyzer.Loadout.renderPanel(p, { showNature: false })}
             </div>
           </div>
 
@@ -2248,12 +2342,12 @@ Analyzer.App = (() => {
                 <span>Lado fuerte: <b>${p.sideName}</b> (Daño máximo ×${p.atk.toFixed(2)})</span>
               </div>
               ${Analyzer.Charts.renderStatBar('Vida (HP)', effectiveHp, 185 + 80, effectiveHp, null, '#5fe08a')}
-              ${Analyzer.Charts.renderStatBar('Velocidad (Spd)', Math.round(effectiveSpd), 162 * 1.24, Math.round(effectiveSpd), null, '#4fb4ff')}
+              ${Analyzer.Charts.renderStatBar('Velocidad (Spd)', Math.round(effectiveSpd), 162 * 1.24, Math.round(effectiveSpd) + spdNatBadge, null, '#4fb4ff')}
               ${Analyzer.Charts.renderStatBar('Ataque Dominante (ATK)', effectiveAtk, 1.70 * 1.40, '×' + effectiveAtk.toFixed(2), null, '#ffd23f')}
-              ${Analyzer.Charts.renderStatBar('Ataque Físico (PA)', p.pa, 1.70, '×' + p.pa.toFixed(2), null, '#ff7043')}
-              ${Analyzer.Charts.renderStatBar('Ataque Especial (SA)', p.sa, 1.70, '×' + p.sa.toFixed(2), null, '#ab47bc')}
-              ${Analyzer.Charts.renderStatBar('Defensa Física (DF)', p.df, 230, p.df + ' (Mitiga ' + (p.mitigationPhysical >= 0 ? '+' : '') + p.mitigationPhysical + '% de daño físico)', null, '#ffb74d')}
-              ${Analyzer.Charts.renderStatBar('Defensa Especial (SD)', p.sd, 230, p.sd + ' (Mitiga ' + (p.mitigationSpecial >= 0 ? '+' : '') + p.mitigationSpecial + '% de daño especial)', null, '#4dd0e1')}
+              ${Analyzer.Charts.renderStatBar('Ataque Físico (PA)', effectivePa, 1.70 * 1.40, '×' + effectivePa.toFixed(2) + paNatBadge, null, '#ff7043')}
+              ${Analyzer.Charts.renderStatBar('Ataque Especial (SA)', effectiveSa, 1.70 * 1.40, '×' + effectiveSa.toFixed(2) + saNatBadge, null, '#ab47bc')}
+              ${Analyzer.Charts.renderStatBar('Defensa Física (DF)', effectiveDf, 230, effectiveDf + dfNatBadge + ' (Mitiga ' + (effMitPhys >= 0 ? '+' : '') + effMitPhys + '% de daño físico)', null, '#ffb74d')}
+              ${Analyzer.Charts.renderStatBar('Defensa Especial (SD)', effectiveSd, 230, effectiveSd + sdNatBadge + ' (Mitiga ' + (effMitSpec >= 0 ? '+' : '') + effMitSpec + '% de daño especial)', null, '#4dd0e1')}
               ${Analyzer.Charts.renderStatBar('Total Base Oficial (BST)', p.bst, 720, p.bst, null, '#ffd23f')}
             </div>
 
@@ -2371,21 +2465,157 @@ Analyzer.App = (() => {
         ${typeDefGrid}
       </div>
 
-      <!-- Ataque inicial y catálogo de movimientos -->
+      <!-- Habilidades Oficiales -->
       <div class="dossier-box" style="margin-top:20px">
-        <h4>Ataque Inicial</h4>
-        ${renderMovesBlock(p)}
+        <div class="dossier-box-title-flex">
+          <h4>${Analyzer.Icons.get('sparkles', { size: 16 })} Habilidades Oficiales (${p.abilities ? p.abilities.count : 0})</h4>
+          <span class="ability-source-badge">${Analyzer.Icons.get('shop', { size: 12 })} Tienda Kecleon & Cápsulas</span>
+        </div>
+        <p class="sub" style="margin:2px 0 14px">Cada Pokémon tiene una habilidad asignada fija para tu cuenta. Se puede cambiar por otra de las suyas con la <b>Cápsula Habilidad</b> o desbloquear la Habilidad Oculta (ratio 1/20) con la <b>Cápsula Habilidad Oculta</b>:</p>
+
+        <div class="abilities-cards-grid">
+          ${p.abilities && p.abilities.list ? p.abilities.list.map(a => `
+            <div class="ability-card ${a.isHidden ? 'is-hidden-ability' : ''}">
+              <div class="ability-card-head">
+                <span class="ability-slot-badge ${a.isHidden ? 'gold' : ''}">
+                  ${a.isHidden ? '⭐ Habilidad Oculta (1/20)' : (a.slot === 0 ? 'Habilidad Primaria' : 'Habilidad Secundaria')}
+                </span>
+                <b class="ability-card-name">${a.name}</b>
+              </div>
+              <p class="ability-card-desc">${a.desc}</p>
+            </div>
+          `).join('') : '<p class="sub">Sin datos de habilidades disponibles.</p>'}
+        </div>
       </div>
 
-      <!-- Catálogo Completo de Movimientos Aprendibles -->
+      <!-- Naturalezas Oficiales y Mentas de Kecleon -->
       <div class="dossier-box" style="margin-top:20px">
-        <h4>Catálogo de Movimientos Aprendibles (${p.moves.totalMoves})</h4>
-        <p class="sub">Incluye los movimientos de sus tipos elementales más los movimientos de tipo Normal comunes a todos los Pokémon:</p>
+        <div class="dossier-box-title-flex">
+          <h4>${Analyzer.Icons.get('mint', { size: 16 })} Naturalezas Oficiales & Mentas (Tienda Kecleon)</h4>
+          <span class="ability-source-badge" style="background:rgba(95,224,138,0.15); color:#5fe08a; border-color:rgba(95,224,138,0.35)">🌱 Menta: 1,200 Monedas</span>
+        </div>
+        <p class="sub" style="margin:2px 0 14px">
+          En PokéSurvivor cada Pokémon tiene una naturaleza con <b>+10% a una estadística y -10% a otra</b> (o neutra).
+          Tu cuenta asigna una de inicio, pero puedes cambiarla cuando quieras comprándole una <b>Menta</b> a Kecleon:
+        </p>
+
+        <div class="nature-highlight-grid">
+          <!-- Tarjeta Naturaleza Actual Asignada -->
+          <div class="current-nature-card">
+            <span class="nature-card-badge">Naturaleza Actual Asignada</span>
+            <div class="nature-card-name">${(p.natureInfo && p.natureInfo.assigned) ? p.natureInfo.assigned.name : 'Neutra'}</div>
+            <div class="nature-card-effects">
+              ${(p.natureInfo && p.natureInfo.assigned && p.natureInfo.assigned.up) ? `<span class="stat-mod up">+10% ${p.natureInfo.assigned.upLabel}</span>` : '<span class="stat-mod neutral">Sin efecto (Neutra)</span>'}
+              ${(p.natureInfo && p.natureInfo.assigned && p.natureInfo.assigned.down) ? `<span class="stat-mod down">-10% ${p.natureInfo.assigned.downLabel}</span>` : ''}
+            </div>
+            <p class="nature-card-hint">Naturaleza base obtenida con la semilla de tu cuenta para ${p.name}.</p>
+          </div>
+
+          <!-- Tarjetas de Naturalezas Recomendadas -->
+          <div class="recommended-natures-panel">
+            <div class="rec-panel-header">
+              <b>${Analyzer.Icons.get('star', { size: 14 })} Mentas Recomendadas para ${p.name}:</b>
+              <span class="sub">Optimiza su perfil según sus puntos fuertes de combate:</span>
+            </div>
+            <div class="rec-natures-chips">
+              ${(p.natureInfo && p.natureInfo.recommended ? p.natureInfo.recommended : []).map(rn => `
+                <div class="rec-nature-chip" title="${rn.reason}">
+                  <div class="rec-chip-top">
+                    <b class="rec-chip-name">${rn.name}</b>
+                    <span class="rec-chip-tag">${rn.tag}</span>
+                  </div>
+                  <div class="rec-chip-effects">
+                    <span class="stat-mod up">+10% ${rn.up.toUpperCase()}</span>
+                    <span class="stat-mod down">-10% ${rn.down.toUpperCase()}</span>
+                  </div>
+                  <div class="rec-chip-reason">${rn.reason}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Selector / Simulador de Menta -->
+        <div class="nature-simulator-bar">
+          <div class="nat-sim-label">
+            <b>${Analyzer.Icons.get('trendUp', { size: 14 })} Simulador de Menta en Vivo:</b>
+            <span>Prueba cómo cambiarían los stats reales de ${p.name} con cada una de las 25 naturalezas:</span>
+          </div>
+          <select class="nature-select-input" onchange="Analyzer.App.onNatureChange(this.value)">
+            ${(p.natureInfo && p.natureInfo.all ? p.natureInfo.all : []).map(n => `
+              <option value="${n.id}" ${n.id === modalSelectedNatureId ? 'selected' : ''}>
+                ${n.name} (${n.up ? `+10% ${n.upLabel}, -10% ${n.downLabel}` : 'Neutra / Sin cambios'})
+              </option>
+            `).join('')}
+          </select>
+        </div>
+      </div>
+
+      <!-- 1. Ataques Base del Pokémon (Iniciales & Subida de Nivel) -->
+      <div class="dossier-box" style="margin-top:20px">
+        <div class="dossier-box-title-flex">
+          <h4>${Analyzer.Icons.get('sword', { size: 16 })} Ataques Base del Pokémon (Iniciales & Subida de Nivel)</h4>
+          <span class="ability-source-badge" style="background:rgba(95,224,138,0.15); color:#5fe08a; border-color:rgba(95,224,138,0.35)">
+            ${(p.moves.naturalMoves || p.moves.poolMoves).length} Movimientos Nativos Base
+          </span>
+        </div>
+        <p class="sub" style="margin:2px 0 14px">
+          Movimientos que vienen de serie con ${p.name}. Incluye sus <b>Ataques Iniciales</b> y todos los ataques que puede aprender al subir de nivel en la partida por sus tipos elementales (${p.types.map(t => G.U.TYPE_NAME[t] || t).join(' / ')}) y tipo Normal. <b>No requieren compra de MT.</b>
+        </p>
+
+        <!-- Ataques Iniciales (1º Inicial y 2º Inicial Desbloqueable) -->
+        <div class="starter-attacks-grid">
+          <!-- 1er Inicial Predeterminado -->
+          <div class="starter-attack-card">
+            <span class="starter-attack-badge default">1er Ataque Inicial (Predeterminado)</span>
+            <div class="starter-attack-body">
+              <div class="move-start-head">
+                <span class="type-pill-sm" style="background:${G.U.TYPE_COLOR[p.moves.startMove ? p.moves.startMove.type : 'normal']}">${G.U.TYPE_NAME[p.moves.startMove ? p.moves.startMove.type : 'normal'] || 'Normal'}</span>
+                <b class="gold">${p.moves.startMove ? p.moves.startMove.name : 'Placaje'}</b>
+                <span class="tag-chip cat-${p.moves.startMove ? p.moves.startMove.cat : 'physical'}">${p.moves.startMove ? p.moves.startMove.catName : 'Físico'}</span>
+                <span class="kind-tag">${p.moves.startMove ? p.moves.startMove.kind : 'projectile'}</span>
+                ${p.moves.startMove ? `<button class="btn small btn-inspect-scale" data-move-id="${p.moves.startMove.id}" data-dex="${p.dex}" style="margin-left:auto" title="Ver escalado completo nivel 1 a 5 y evolución dorada">${Analyzer.Icons.get('trendUp', { size: 12 })} Escalado Nv. 1-5</button>` : ''}
+              </div>
+              <div class="move-start-meta">Ataque inicial de serie · ${p.moves.startMove ? p.moves.startMove.dmg : 10} daño base · recarga ${p.moves.startMove ? p.moves.startMove.cd : 0.6}s · DPS ${p.moves.startMove ? p.moves.startMove.dpsEstimate : 16} · Eficacia con ${p.name}: <b>${p.moves.startMove ? p.moves.startMove.fitPct : 100}%</b></div>
+              <div class="sub">${p.moves.startMove ? p.moves.startMove.desc : ''}</div>
+            </div>
+          </div>
+
+          <!-- 2º Inicial Desbloqueable (Mejora start2 de Tienda) -->
+          ${p.moves.startMove2 ? `
+            <div class="starter-attack-card">
+              <span class="starter-attack-badge unlockable">2º Ataque Inicial (Mejora «Segundo movimiento inicial»)</span>
+              <div class="starter-attack-body">
+                <div class="move-start-head">
+                  <span class="type-pill-sm" style="background:${G.U.TYPE_COLOR[p.moves.startMove2.type]}">${G.U.TYPE_NAME[p.moves.startMove2.type] || p.moves.startMove2.type}</span>
+                  <b class="gold">${p.moves.startMove2.name}</b>
+                  <span class="tag-chip cat-${p.moves.startMove2.cat}">${p.moves.startMove2.catName}</span>
+                  <span class="kind-tag">${p.moves.startMove2.kind}</span>
+                  <button class="btn small btn-inspect-scale" data-move-id="${p.moves.startMove2.id}" data-dex="${p.dex}" style="margin-left:auto" title="Ver escalado completo nivel 1 a 5 y evolución dorada">${Analyzer.Icons.get('trendUp', { size: 12 })} Escalado Nv. 1-5</button>
+                </div>
+                <div class="move-start-meta">Segundo ataque inicial alternativo · ${p.moves.startMove2.dmg} daño base · recarga ${p.moves.startMove2.cd}s · DPS ${p.moves.startMove2.dpsEstimate} · Eficacia con ${p.name}: <b>${p.moves.startMove2.fitPct}%</b></div>
+                <div class="sub">${p.moves.startMove2.desc}</div>
+              </div>
+            </div>
+          ` : `
+            <div class="starter-attack-card disabled">
+              <span class="starter-attack-badge unlockable">2º Ataque Inicial (Mejora Tienda «start2»)</span>
+              <p class="sub" style="margin:8px 0 0; line-height:1.4">
+                Al comprar la mejora <b>Segundo movimiento inicial</b> en la Tienda con Repertorio, ${p.name} puede comenzar la partida con 2 ataques a la vez eligiendo entre sus movimientos base disponibles.
+              </p>
+            </div>
+          `}
+        </div>
+
+        <!-- Tabla Completa de Movimientos Base Naturales -->
+        <h5 style="margin:20px 0 8px; color:var(--text); font-size:14px">
+          Movimientos Base Aprendibles al Subir de Nivel (${(p.moves.naturalMoves || p.moves.poolMoves).length}):
+        </h5>
         <div class="table-container">
           <table class="analyzer-table">
             <thead>
               <tr>
-                <th>Movimiento</th>
+                <th>Movimiento Base</th>
                 <th>Categoría</th>
                 <th>Tipo</th>
                 <th>Familia</th>
@@ -2398,28 +2628,78 @@ Analyzer.App = (() => {
               </tr>
             </thead>
             <tbody>
-              ${movesRows}
+              ${naturalMovesRows}
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- Sección de Transparencia de Datos -->
-      <div class="dossier-box verification-box" style="margin-top:20px">
-        <h4>Verificación de Datos y Ausencias en el Motor</h4>
-        <div class="verification-meta">
-          <p>${Analyzer.Icons.get('check', { size: 13 })} <b>Fuente de datos:</b> Archivos oficiales del repositorio local (pokedex.js, moves.js, sprites-meta.js, starters.js, enemies.js, types.js).</p>
-          <p>${Analyzer.Icons.get('check', { size: 13 })} <b>No invención de atributos:</b> Los valores mostrados son extraídos directamente del código o calculados con sus fórmulas exactas.</p>
+      <!-- 2. Movimientos Adicionales por Máquina Técnica (MTs de la Tienda Kecleon) -->
+      ${p.tms && p.tms.count > 0 ? `
+        <div class="dossier-box tms-section-box" style="margin-top:20px">
+          <div class="dossier-box-title-flex">
+            <h4>${Analyzer.Icons.get('tm', { size: 16 })} Movimientos Adicionales por Máquina Técnica (MTs: ${p.tms.count})</h4>
+            <span class="ability-source-badge">${Analyzer.Icons.get('coin', { size: 12 })} 8 MTs distintas cada día en la Tienda</span>
+          </div>
+          <p class="sub" style="margin:2px 0 14px">
+            Estos ataques <b>NO vienen de serie</b> en ${p.name}. Se adquieren comprando la MT en la Tienda Kecleon para agregarlos de forma permanente al repertorio del Pokémon.
+            ${p.tms.extraCount > 0 ? `<b>${p.tms.extraCount} MTs otorgan nueva cobertura elemental</b> fuera de sus tipos nativos:` : ''}
+          </p>
+
+          ${p.tms.extraCoverage.length > 0 ? `
+            <div class="extra-tms-banner">
+              <span class="extra-tms-title">🎯 Nueva Cobertura Elemental Disponible por MT:</span>
+              <div class="extra-tms-chips">
+                ${p.tms.extraCoverage.map(tm => `
+                  <div class="tm-chip" title="${tm.name}: ${tm.desc} · Daño: ${tm.dmg || 'Mejora'} · Precio: ${tm.price} monedas">
+                    <span class="type-pill-sm" style="background:${G.U.TYPE_COLOR[tm.type]}">${G.U.TYPE_NAME[tm.type] || tm.type}</span>
+                    <b class="tm-name">${tm.name}</b>
+                    <span class="tm-cat">${tm.catName}</span>
+                    <span class="tm-price">💰 ${tm.price}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="table-container" style="margin-top:10px">
+            <table class="analyzer-table">
+              <thead>
+                <tr>
+                  <th>MT / Movimiento</th>
+                  <th>Tipo</th>
+                  <th>Categoría</th>
+                  <th>Daño Base</th>
+                  <th>Recarga</th>
+                  <th>Precio Kecleon</th>
+                  <th>Cobertura Elemental</th>
+                  <th>Descripción del Efecto</th>
+                  <th style="text-align:center">Escalado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${p.tms.all.map(tm => `
+                  <tr>
+                    <td><b>${tm.name}</b></td>
+                    <td><span class="type-pill-sm" style="background:${G.U.TYPE_COLOR[tm.type]}">${G.U.TYPE_NAME[tm.type] || tm.type}</span></td>
+                    <td><span class="cat-pill ${tm.cat}">${tm.catName}</span></td>
+                    <td>${tm.dmg ? `<b>${tm.dmg}</b>` : '<span class="muted">—</span>'}</td>
+                    <td>${tm.cd ? `${tm.cd}s` : '<span class="muted">—</span>'}</td>
+                    <td><b style="color:#ffd23f">💰 ${tm.price}</b></td>
+                    <td>${tm.isExtra ? '<span class="badge-extra-cov">Nueva Cobertura</span>' : '<span class="muted">Tipo Nativo</span>'}</td>
+                    <td><small>${tm.desc}</small></td>
+                    <td style="text-align:center">
+                      <button class="btn small btn-inspect-scale" data-move-id="${tm.id}" data-dex="${p.dex}" title="Ver escalado completo nivel 1 a 5 y evolución dorada">
+                        ${Analyzer.Icons.get('trendUp', { size: 12 })} Escalado
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="unavailable-features-list">
-          <b>Características no disponibles en PokéSurvivor:</b>
-          <ul>
-            ${p.verification.unavailableFeatures.map(f => `
-              <li><b>${f.feature}:</b> <span class="tag-unavail">${f.status}</span> — ${f.reason}</li>
-            `).join('')}
-          </ul>
-        </div>
-      </div>
+      ` : ''}
     `;
 
     // Inicializar canvas del visor en modal
@@ -2552,6 +2832,7 @@ Analyzer.App = (() => {
     resetAllFilters,
     switchTab,
     registerCanvasSprite,
+    onNatureChange,
     toast,
     playSfx
   };

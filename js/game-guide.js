@@ -663,6 +663,46 @@ Analyzer.GameGuide = (() => {
                 </div>
               </div>
 
+          <!-- CAPÍTULO 4: TIENDA KECLEON, HABILIDADES Y MÁQUINAS TÉCNICAS (ACTUALIZACIÓN 21-10) -->
+          <article class="timeline-step">
+            <div class="timeline-dot" style="background:#5fe08a; border-color:#ffd23f"></div>
+            <div class="timeline-content">
+              <div class="step-header">
+                <span class="step-clock" style="background:rgba(95,224,138,0.2); color:#5fe08a; border-color:rgba(95,224,138,0.4)">
+                  ${Analyzer.Icons.get('shop', { size: 14 })} TIENDA KECLEON & MOCHILA
+                </span>
+                <span class="step-title">Habilidades Oficiales, Naturalezas (Mentas) y Máquinas Técnicas (MT)</span>
+              </div>
+              <p class="step-lead">
+                La gran actualización del 21-10-2026 introduce la <b>Tienda Kecleon</b> en el menú principal, donde se compran artículos permanentes para la Mochila con Pokémonedas obtenidas en tus partidas:
+              </p>
+
+              <div class="sys-feature-grid">
+                <div class="sys-sub-box">
+                  <div class="sub-box-title"><span class="sub-box-icon">${Analyzer.Icons.get('mint', { size: 14 })}</span> Mentas (1.500 monedas)</div>
+                  <p>
+                    Permite cambiar la <b>Naturaleza</b> de cualquier Pokémon por la que elijas. Aplica un <b>+10% a una estadística</b> (Físico, Especial, Defensas o Velocidad) y un <b>−10% a otra</b> (5 de las 25 son neutras).
+                  </p>
+                </div>
+                <div class="sys-sub-box">
+                  <div class="sub-box-title"><span class="sub-box-icon">${Analyzer.Icons.get('capsule', { size: 14 })}</span> Cápsulas Habilidad (1.500 / 5.000)</div>
+                  <p>
+                    La <b>Cápsula Habilidad</b> permuta entre las dos habilidades normales del Pokémon. La <b>Cápsula Habilidad Oculta</b> permite desbloquear la Habilidad Oculta de la especie (ratio natural 1 de cada 20).
+                  </p>
+                </div>
+                <div class="sys-sub-box">
+                  <div class="sub-box-title"><span class="sub-box-icon">${Analyzer.Icons.get('tm', { size: 14 })}</span> 8 MTs Rotatorias Diarias</div>
+                  <p>
+                    Cada día a las 00:00 (hora peninsular España) Kecleon expone <b>8 MTs idénticas para todos los jugadores</b>. Al enseñársela a un Pokémon, ese ataque se añade a sus cartas de nivel y puede elegirse como movimiento inicial.
+                  </p>
+                </div>
+                <div class="sys-sub-box">
+                  <div class="sub-box-title"><span class="sub-box-icon">${Analyzer.Icons.get('cursor', { size: 14 })}</span> Mejora Segundo Movimiento Inicial</div>
+                  <p>
+                    En la sección de Mejoras de la Tienda se añade <b>Segundo movimiento inicial (start2)</b> por 400 monedas: permite elegir exactamente con qué segundo ataque de Repertorio comenzarás tu partida.
+                  </p>
+                </div>
+              </div>
             </div>
           </article>
 

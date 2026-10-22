@@ -1172,7 +1172,9 @@ Analyzer.Charts = (() => {
       const isPositive = delta.value > 0;
       const sign = isPositive ? '+' : '';
       const cls = isPositive ? 'delta-pos' : 'delta-neg';
-      deltaHtml = `<span class="stat-delta ${cls}">${sign}${delta.formatted || delta.value}</span>`;
+      const rawText = delta.formatted != null ? String(delta.formatted) : String(delta.value);
+      const text = (rawText.startsWith('+') || rawText.startsWith('−') || rawText.startsWith('-')) ? rawText : (sign + rawText);
+      deltaHtml = `<span class="stat-delta ${cls}">${text}</span>`;
     }
 
     return `

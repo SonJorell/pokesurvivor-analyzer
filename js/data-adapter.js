@@ -23,6 +23,16 @@ Analyzer.DataAdapter = (() => {
     6: 'Kalos', 7: 'Alola', 8: 'Galar', 9: 'Paldea'
   };
 
+  const STAT_NAMES = {
+    hp: 'Salud Base (HP)',
+    spd: 'Velocidad (SPD)',
+    pa: 'Ataque Físico (PA)',
+    sa: 'Ataque Especial (SA)',
+    df: 'Defensa Física (DF)',
+    sd: 'Defensa Especial (SD)',
+    atk: 'Ataque Dominante (ATK)'
+  };
+
   const getIco = (name, size = 14) => (window.Analyzer && Analyzer.Icons && Analyzer.Icons.get ? Analyzer.Icons.get(name, { size }) : '');
 
   // Metadatos de Regiones del Mundo Pokémon en PokéSurvivor (100% Verificados)
@@ -208,14 +218,23 @@ Analyzer.DataAdapter = (() => {
    * Movimiento inicial y lista de movimientos que puede aprender
    */
   function getMovesData(p) {
-    // Movimiento inicial verificado en starters.js o moves.js
+    // 1. Primer Movimiento Inicial de serie (G.startMoveOf)
     const startMoveId = G.startMoveOf ? G.startMoveOf(p.dex) : (G.Moves ? G.Moves.startFor(p) : 'tackle');
     const startMoveDef = (G.Moves && G.Moves.BY_ID && G.Moves.BY_ID[startMoveId]) || null;
+    const startCat = startMoveDef ? startMoveDef.cat || null : null;
+    const startFit = (startMoveDef && window.G && G.Stats && G.Stats.fit) ? G.Stats.fit(p, startCat) : 1;
 
-    // Repertorio de movimientos que este Pokémon puede aprender (G.Moves.poolFor):
-    // tipos del Pokémon + tipo normal común a todos
-    const poolIds = (G.Moves && G.Moves.poolFor) ? G.Moves.poolFor(p) : [];
-    const poolMoves = poolIds.map(id => {
+    // 2. Segundo Movimiento Inicial (start2) y Opciones de Inicio (G.startChoices)
+    const choices = (G.startChoices && p.dex) ? G.startChoices(p.dex) : [];
+    const altChoiceId = choices.find(id => id !== startMoveId) || null;
+    const altMoveDef = altChoiceId && G.Moves.BY_ID ? G.Moves.BY_ID[altChoiceId] : null;
+    const altCat = altMoveDef ? altMoveDef.cat || null : null;
+    const altFit = (altMoveDef && window.G && G.Stats && G.Stats.fit) ? G.Stats.fit(p, altCat) : 1;
+
+    // 3. Repertorio de Movimientos Base / Naturales al subir de nivel (G.Moves.poolFor(p, true)):
+    // Estrictamente los tipos nativos del Pokémon + tipo normal (no incluye MTs)
+    const naturalIds = (G.Moves && G.Moves.poolFor) ? G.Moves.poolFor(p, true) : [];
+    const naturalMoves = naturalIds.map(id => {
       const def = G.Moves.BY_ID[id];
       if (!def) return null;
       const evo = G.Moves.EVO ? G.Moves.EVO[id] : null;
@@ -259,9 +278,7 @@ Analyzer.DataAdapter = (() => {
     }).filter(Boolean);
 
     // Variedad de familias (kinds)
-    const kindsSet = new Set(poolMoves.map(m => m.kind));
-    const startCat = startMoveDef ? startMoveDef.cat || null : null;
-    const startFit = (startMoveDef && window.G && G.Stats && G.Stats.fit) ? G.Stats.fit(p, startCat) : 1;
+    const kindsSet = new Set(naturalMoves.map(m => m.kind));
 
     return {
       startMoveId,
@@ -279,10 +296,28 @@ Analyzer.DataAdapter = (() => {
         dmg: startMoveDef.dmg || 0,
         dpsEstimate: startMoveDef.cd ? Math.round(((startMoveDef.dmg || 0) / startMoveDef.cd) * 10) / 10 : 0
       } : null,
-      totalMoves: poolMoves.length,
+      startMove2: altMoveDef ? {
+        id: altChoiceId,
+        name: altMoveDef.name,
+        type: altMoveDef.type,
+        kind: altMoveDef.kind,
+        cat: altCat,
+        catName: altCat === 'physical' ? 'Físico' : altCat === 'special' ? 'Especial' : 'Mejora',
+        fit: Math.round(altFit * 100) / 100,
+        fitPct: Math.round(altFit * 100),
+        desc: altMoveDef.desc,
+        cd: altMoveDef.cd,
+        dmg: altMoveDef.dmg || 0,
+        dpsEstimate: altMoveDef.cd ? Math.round(((altMoveDef.dmg || 0) / altMoveDef.cd) * 10) / 10 : 0
+      } : null,
+      startChoicesCount: choices.length,
+      startChoices: choices,
+      totalMoves: naturalMoves.length,
+      totalNaturalMoves: naturalMoves.length,
+      naturalMoves,
+      poolMoves: naturalMoves,
       distinctKindsCount: kindsSet.size,
-      distinctKinds: Array.from(kindsSet),
-      poolMoves
+      distinctKinds: Array.from(kindsSet)
     };
   }
 
@@ -342,6 +377,192 @@ Analyzer.DataAdapter = (() => {
       description: (ROLE_INFO[role] && ROLE_INFO[role].desc) || 'Comportamiento en combate salvaje.',
       isBossCandidate
     };
+  }
+
+  /**
+   * Habilidades oficiales de PokéSurvivor (Actualización del 21-10-2026)
+   * G.DEX_ABIL[dex]: [habilidad 1, habilidad 2 o 0, oculta o 0]
+   * G.ABIL[id]: [es, en, fr, it, zh-Hans, zh-Hant]
+   * G.AbilityFX: Efectos verificados en combate
+   */
+  function getAbilitiesData(dex) {
+    if (!window.G || !G.DEX_ABIL) return { list: [], ability1: null, ability2: null, hidden: null, count: 0 };
+    const slots = G.DEX_ABIL[dex] || [0, 0, 0];
+
+    const mon = (G.DEX_BY && G.DEX_BY[dex]) || { dex, types: ['normal'] };
+    const parseAbil = (id, isHidden = false, slotIdx = 0) => {
+      if (!id) return null;
+      const names = G.ABIL && G.ABIL[id];
+      const name = (names && names[0]) || id;
+      const fx = (G.AbilityFX && G.AbilityFX.of) ? G.AbilityFX.of(id, mon) : ((G.AbilityFX && G.AbilityFX.FX && G.AbilityFX.FX[id]) || null);
+      const desc = fx ? (fx.d + (fx.d2 ? ' ' + fx.d2 : '')) : '+8 % de daño con movimientos de su tipo principal.';
+      return {
+        id,
+        slot: slotIdx,
+        name,
+        desc,
+        isHidden,
+        isGeneric: fx ? !!fx.generic : true
+      };
+    };
+
+    const ability1 = parseAbil(slots[0], false, 0);
+    const ability2 = slots[1] ? parseAbil(slots[1], false, 1) : null;
+    const hidden = slots[2] ? parseAbil(slots[2], true, 2) : null;
+    const list = [ability1, ability2, hidden].filter(Boolean);
+
+    return {
+      list,
+      ability1,
+      ability2,
+      hidden,
+      hasHidden: !!hidden,
+      count: list.length
+    };
+  }
+
+  /**
+   * MTs oficiales de la Tienda Kecleon que este Pokémon puede aprender (21-10-2026)
+   * G.TM_OF(dex): lista de MTs compatibles
+   * G.TM_PRICE: precios en Pokémonedas
+   */
+  function getTMsData(p) {
+    if (!window.G || !G.TM_OF) return { all: [], extraCoverage: [], count: 0, extraCount: 0 };
+    const tmIds = G.TM_OF(p.dex) || [];
+    const naturalMoves = (G.Moves && G.Moves.poolFor) ? G.Moves.poolFor(p, true) : [];
+
+    const all = [];
+    for (const mId of tmIds) {
+      const def = G.Moves && G.Moves.BY_ID && G.Moves.BY_ID[mId];
+      if (!def) continue;
+      const isNatural = naturalMoves.includes(mId);
+      const price = (G.TM_PRICE && G.TM_PRICE[mId]) || 600;
+
+      all.push({
+        id: mId,
+        name: def.name || mId,
+        type: def.type || 'normal',
+        kind: def.kind || 'projectile',
+        cat: def.cat || 'special',
+        catName: def.cat === 'physical' ? 'Físico' : def.cat === 'special' ? 'Especial' : 'Mejora',
+        dmg: def.dmg || 0,
+        cd: def.cd || 0,
+        desc: def.desc || '',
+        price,
+        isNatural,
+        isExtra: !isNatural
+      });
+    }
+
+    all.sort((a, b) => {
+      if (a.isNatural !== b.isNatural) return a.isNatural ? 1 : -1;
+      return a.name.localeCompare(b.name, 'es');
+    });
+
+    const extraCoverage = all.filter(m => m.isExtra);
+
+    return {
+      all,
+      extraCoverage,
+      count: all.length,
+      extraCount: extraCoverage.length
+    };
+  }
+
+  /**
+   * Recomienda las mejores naturalezas / mentas según el perfil táctico del Pokémon
+   */
+  function getRecommendedNatures(p) {
+    const rec = [];
+    const isPhys = p.pa > p.sa * 1.08;
+    const isSpec = p.sa > p.pa * 1.08;
+
+    if (isPhys) {
+      rec.push({
+        id: 'adamant', name: 'Firme', up: 'pa', down: 'sa',
+        tag: 'Máxima Potencia Física',
+        reason: '+10% Ataque Físico, -10% Atq. Especial (ideal para maximizar su repertorio físico).'
+      });
+      rec.push({
+        id: 'jolly', name: 'Alegre', up: 'spd', down: 'sa',
+        tag: 'Velocidad & Posicionamiento',
+        reason: '+10% Velocidad, -10% Atq. Especial (evasión superior de proyectiles y enjambres).'
+      });
+    } else if (isSpec) {
+      rec.push({
+        id: 'modest', name: 'Modesta', up: 'sa', down: 'pa',
+        tag: 'Máxima Potencia Especial',
+        reason: '+10% Atq. Especial, -10% Ataque Físico (aumenta el daño de sus proyectiles mágicos y rayos).'
+      });
+      rec.push({
+        id: 'timid', name: 'Miedosa', up: 'spd', down: 'pa',
+        tag: 'Velocidad & Reposicionamiento',
+        reason: '+10% Velocidad, -10% Ataque Físico (movilidad máxima en combate).'
+      });
+    } else {
+      rec.push({
+        id: 'adamant', name: 'Firme', up: 'pa', down: 'sa',
+        tag: 'Opción Ofensiva Física',
+        reason: '+10% Ataque Físico, -10% Atq. Especial.'
+      });
+      rec.push({
+        id: 'modest', name: 'Modesta', up: 'sa', down: 'pa',
+        tag: 'Opción Ofensiva Especial',
+        reason: '+10% Atq. Especial, -10% Ataque Físico.'
+      });
+    }
+
+    // Opción Tanque Defensiva
+    if (p.df >= p.sd) {
+      rec.push({
+        id: isSpec ? 'bold' : 'impish',
+        name: isSpec ? 'Osada' : 'Agitada',
+        up: 'df',
+        down: isSpec ? 'pa' : 'sa',
+        tag: 'Baluarte Defensivo Físico',
+        reason: `+10% Defensa Física (mitiga daño de enemigos que embisten de cerca).`
+      });
+    } else {
+      rec.push({
+        id: isSpec ? 'calm' : 'careful',
+        name: isSpec ? 'Serena' : 'Cauta',
+        up: 'sd',
+        down: isSpec ? 'pa' : 'sa',
+        tag: 'Baluarte Defensivo Especial',
+        reason: `+10% Defensa Especial (mitiga proyectiles y auras enemigas).`
+      });
+    }
+
+    return rec;
+  }
+
+  /**
+   * Las 25 naturalezas oficiales y sus modificadores (+10% / -10%) con Mentas
+   */
+  function getNaturesData(p) {
+    if (!window.G || !G.NATURES) return [];
+    return G.NATURES.map(n => {
+      const copy = Object.assign({}, p);
+      if (n.up) copy[n.up] = p[n.up] * 1.1;
+      if (n.down) copy[n.down] = p[n.down] * 0.9;
+      return {
+        id: n.id,
+        name: n.n[0],
+        up: n.up,
+        down: n.down,
+        upLabel: n.up ? (STAT_NAMES[n.up] || n.up.toUpperCase()) : 'Neutro',
+        downLabel: n.down ? (STAT_NAMES[n.down] || n.down.toUpperCase()) : 'Neutro',
+        isNeutral: !n.up && !n.down,
+        resultStats: {
+          hp: copy.hp,
+          spd: Math.round(copy.spd * 10) / 10,
+          pa: Math.round(copy.pa * 100) / 100,
+          sa: Math.round(copy.sa * 100) / 100,
+          df: Math.round(copy.df * 10) / 10,
+          sd: Math.round(copy.sd * 10) / 10
+        }
+      };
+    });
   }
 
   /**
@@ -685,6 +906,23 @@ Analyzer.DataAdapter = (() => {
     const takenSpecial = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken(raw, 'special') : 1.0;
     const mitigationPhysical = Math.round((1 - takenPhysical) * 100);
     const mitigationSpecial = Math.round((1 - takenSpecial) * 100);
+    const abilities = getAbilitiesData(raw.dex);
+    const tms = getTMsData(raw);
+    const natures = getNaturesData(raw);
+    const rawAssignedNat = (G.Mons && G.Mons.natureOf) ? G.Mons.natureOf(raw.dex) : ((G.NATURES && G.NATURES[0]) || { id: 'hardy', n: ['Fuerte'], up: '', down: '' });
+    const natureInfo = {
+      assigned: {
+        id: rawAssignedNat.id,
+        name: (rawAssignedNat.n && rawAssignedNat.n[0]) || rawAssignedNat.id,
+        up: rawAssignedNat.up || '',
+        down: rawAssignedNat.down || '',
+        upLabel: rawAssignedNat.up ? (STAT_NAMES[rawAssignedNat.up] || rawAssignedNat.up.toUpperCase()) : 'Neutro',
+        downLabel: rawAssignedNat.down ? (STAT_NAMES[rawAssignedNat.down] || rawAssignedNat.down.toUpperCase()) : 'Neutro',
+        isNeutral: !rawAssignedNat.up && !rawAssignedNat.down
+      },
+      all: natures,
+      recommended: getRecommendedNatures(raw)
+    };
 
     return {
       dex: raw.dex,
@@ -725,6 +963,12 @@ Analyzer.DataAdapter = (() => {
       starterTraits,
       enemyRole,
 
+      // Habilidades oficiales y MTs de la Tienda Kecleon (21-10-2026)
+      abilities,
+      tms,
+      natures,
+      natureInfo,
+
       // Efectividades y ambientes
       typeMatchups,
       liquidInteractions,
@@ -743,14 +987,27 @@ Analyzer.DataAdapter = (() => {
           'js/data/pokedex.js',
           'js/data/sprites-meta.js',
           'js/data/moves.js',
+          'js/data/natures.js',
+          'js/data/abilities.js',
+          'js/data/ability-fx.js',
+          'js/data/tms.js',
           'js/data/starters.js',
           'js/data/enemies.js',
           'js/data/types.js',
-          'js/systems/stats.js'
+          'js/data/upgrades.js',
+          'js/data/items.js',
+          'js/data/shop.js',
+          'js/systems/stats.js',
+          'js/systems/mons.js'
+        ],
+        availableFeatures: [
+          { feature: 'Habilidades Oficiales (G.ABIL / G.DEX_ABIL)', status: 'Disponible (Actualización 21-10)', desc: 'Habilidades 1 y 2, más Habilidad Oculta con ratio 1/20 y Cápsulas de Habilidad de la Tienda Kecleon.' },
+          { feature: 'Naturalezas Oficiales (G.NATURES)', status: 'Disponible (Actualización 21-10)', desc: '25 naturalezas (+10% stat up / -10% stat down) modificables mediante Mentas de Kecleon.' },
+          { feature: 'Máquinas Técnicas (G.TM_MOVES / G.TM_OF)', status: 'Disponible (Actualización 21-10)', desc: 'Catálogo de MTs aprendibles de la Tienda Kecleon con rotación diaria de 8 movimientos.' },
+          { feature: 'Segundo Movimiento Inicial (G.startMove2Of)', status: 'Disponible (Actualización 21-10)', desc: 'Elección del segundo ataque inicial mediante la nueva mejora start2 de la tienda.' }
         ],
         unavailableFeatures: [
-          { feature: 'Habilidades (Abilities clásicas)', status: 'No disponible', reason: 'PokéSurvivor no implementa el sistema de habilidades pasivas de los juegos principales.' },
-          { feature: 'EVs / IVs / Naturalezas', status: 'No disponible', reason: 'No existen en el motor; los stats son fijos según la especie más mejoras permanentes de la tienda y objetos.' }
+          { feature: 'EVs / IVs tradicionales de Nintendo', status: 'No disponible', reason: 'PokéSurvivor no utiliza valores de esfuerzo ni individuales; los stats se definen por especie, naturaleza, mejoras y objetos.' }
         ]
       }
     };
@@ -862,10 +1119,13 @@ Analyzer.DataAdapter = (() => {
   }
 
   /**
-   * Calcula estadísticas y rendimiento de un Pokémon con un objeto equipado.
-   * @returns {{item:Object|null, base:Object, stats:Object, performance:Object, perfDelta:Object, statDelta:Object}}
+   * Calcula estadísticas y rendimiento de un Pokémon con una naturaleza (Menta) y/o un objeto equipado.
+   * @param {Object} p Pokémon enriquecido
+   * @param {string|null} itemId Id del objeto equipado (opcional)
+   * @param {string|null} natureId Id de la naturaleza (opcional, si no se pasa usa la asignada o natural)
+   * @returns {{item:Object|null, nature:Object, base:Object, stats:Object, performance:Object, perfDelta:Object, statDelta:Object}}
    */
-  function applyItem(p, itemId) {
+  function applyBuild(p, itemId, natureId) {
     const startMove = p.moves && p.moves.startMove;
     const baseDps = startMove ? startMove.dpsEstimate : 0;
     const base = {
@@ -875,39 +1135,88 @@ Analyzer.DataAdapter = (() => {
       df: p.df != null ? p.df : 75,
       sd: p.sd != null ? p.sd : 75,
       spd: p.spd,
+      hp: p.hp,
       effHp: p.hp,
       dps: baseDps,
-      regen: 0
+      regen: 0,
+      bst: p.bst,
+      mitigationPhysical: p.mitigationPhysical != null ? p.mitigationPhysical : 0,
+      mitigationSpecial: p.mitigationSpecial != null ? p.mitigationSpecial : 0
     };
 
-    const def = itemId && G.Items && G.Items.BY ? G.Items.BY[itemId] : null;
-    const fx = def ? (ITEM_EFFECTS[itemId] || {}) : null;
-    if (!def) {
-      const zero = {};
-      PERF_KEYS.forEach(k => { zero[k] = 0; });
-      return {
-        item: null, base, stats: Object.assign({}, base), performance: p.performance,
-        perfDelta: zero, statDelta: { atk: 0, pa: 0, sa: 0, spd: 0, effHp: 0, dps: 0, regen: 0 }
-      };
-    }
+    // 1. Modificadores de naturaleza (Menta o Asignada)
+    const effectiveNatId = natureId || (p.natureInfo && p.natureInfo.assigned && p.natureInfo.assigned.id) || p.nature || 'hardy';
+    const natDef = (window.G && G.NATURE_BY && G.NATURE_BY[effectiveNatId]) || { id: effectiveNatId, n: [effectiveNatId], up: '', down: '' };
+    const natName = Array.isArray(natDef.n) ? natDef.n[0] : (natDef.name || natDef.id);
 
-    const atkMul = fx.atkMul || 1;
-    const spdMul = fx.spdMul || 1;
-    const cdMul = fx.cdMul || 1;
-    const dmgReduce = fx.dmgReduce || 0;
+    let natModPa = 1.0, natModSa = 1.0, natModDf = 1.0, natModSd = 1.0, natModSpd = 1.0;
+    if (natDef.up === 'pa') natModPa = 1.1;
+    else if (natDef.up === 'sa') natModSa = 1.1;
+    else if (natDef.up === 'df') natModDf = 1.1;
+    else if (natDef.up === 'sd') natModSd = 1.1;
+    else if (natDef.up === 'spd') natModSpd = 1.1;
+
+    if (natDef.down === 'pa') natModPa = 0.9;
+    else if (natDef.down === 'sa') natModSa = 0.9;
+    else if (natDef.down === 'df') natModDf = 0.9;
+    else if (natDef.down === 'sd') natModSd = 0.9;
+    else if (natDef.down === 'spd') natModSpd = 0.9;
+
+    const natPa = base.pa * natModPa;
+    const natSa = base.sa * natModSa;
+    const natDf = Math.round(base.df * natModDf);
+    const natSd = Math.round(base.sd * natModSd);
+    const natSpd = base.spd * natModSpd;
+    const natAtk = Math.max(natPa, natSa);
+
+    // 2. Modificadores de objeto equipado
+    const def = itemId && window.G && G.Items && G.Items.BY ? G.Items.BY[itemId] : null;
+    const fx = def ? (ITEM_EFFECTS[itemId] || {}) : null;
+
+    const atkMul = fx ? (fx.atkMul || 1) : 1;
+    const spdMul = fx ? (fx.spdMul || 1) : 1;
+    const cdMul = fx ? (fx.cdMul || 1) : 1;
+    const dmgReduce = fx ? (fx.dmgReduce || 0) : 0;
+    const regenPct = fx ? (fx.regenPct || 0) : 0;
+
+    // 3. Estadísticas combinadas finales (Naturaleza + Objeto)
+    const finalPa = natPa * atkMul;
+    const finalSa = natSa * atkMul;
+    const finalAtk = natAtk * atkMul;
+    const finalDf = natDf;
+    const finalSd = natSd;
+    const finalSpd = natSpd * spdMul;
+    const finalEffHp = base.hp / (1 - dmgReduce);
+    const finalDps = Math.round((baseDps * (finalAtk / (base.atk || 1)) / cdMul) * 10) / 10;
+    const finalRegen = Math.round(base.hp * regenPct * 10) / 10;
+
+    const effTakenPhys = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken({ df: finalDf }, 'physical') : (p.takenPhysical || 1.0);
+    const effTakenSpec = (window.G && G.Stats && G.Stats.taken) ? G.Stats.taken({ sd: finalSd }, 'special') : (p.takenSpecial || 1.0);
+    const effMitPhys = Math.round((1 - effTakenPhys) * 100);
+    const effMitSpec = Math.round((1 - effTakenSpec) * 100);
+
+    const bstDelta = (finalDf - base.df) + (finalSd - base.sd) + Math.round(finalSpd - base.spd) + Math.round((finalPa - base.pa) * 100) + Math.round((finalSa - base.sa) * 100);
+    const finalBst = Math.round(p.bst + bstDelta);
 
     const stats = {
-      atk: p.atk * atkMul,
-      pa: (p.pa != null ? p.pa : p.atk) * atkMul,
-      sa: (p.sa != null ? p.sa : p.atk) * atkMul,
-      df: p.df != null ? p.df : 75,
-      sd: p.sd != null ? p.sd : 75,
-      spd: p.spd * spdMul,
-      effHp: p.hp / (1 - dmgReduce),
-      dps: Math.round((baseDps * atkMul / cdMul) * 10) / 10,
-      regen: Math.round(p.hp * (fx.regenPct || 0) * 10) / 10
+      atk: finalAtk,
+      pa: finalPa,
+      sa: finalSa,
+      df: finalDf,
+      sd: finalSd,
+      spd: finalSpd,
+      effHp: finalEffHp,
+      hp: base.hp,
+      dps: finalDps,
+      regen: finalRegen,
+      takenPhysical: effTakenPhys,
+      takenSpecial: effTakenSpec,
+      mitigationPhysical: effMitPhys,
+      mitigationSpecial: effMitSpec,
+      bst: finalBst
     };
 
+    // 4. Recalcular Rendimiento (Performance Ratings)
     const modRaw = { atk: stats.atk, pa: stats.pa, sa: stats.sa, df: stats.df, sd: stats.sd, spd: stats.spd, hp: stats.effHp };
     const modMoves = Object.assign({}, p.moves, {
       startMove: startMove ? Object.assign({}, startMove, { dpsEstimate: stats.dps }) : null
@@ -916,20 +1225,58 @@ Analyzer.DataAdapter = (() => {
 
     const perfDelta = {};
     PERF_KEYS.forEach(k => { perfDelta[k] = (performance[k] || 0) - (p.performance[k] || 0); });
+
     const statDelta = {
       atk: stats.atk - base.atk,
       pa: stats.pa - base.pa,
       sa: stats.sa - base.sa,
+      df: stats.df - base.df,
+      sd: stats.sd - base.sd,
       spd: stats.spd - base.spd,
       effHp: stats.effHp - base.effHp,
       dps: Math.round((stats.dps - base.dps) * 10) / 10,
-      regen: stats.regen - base.regen
+      regen: stats.regen - base.regen,
+      bst: stats.bst - base.bst,
+      mitigationPhysical: effMitPhys - base.mitigationPhysical,
+      mitigationSpecial: effMitSpec - base.mitigationSpecial
     };
 
-    return {
-      item: { id: def.id, name: def.name, desc: def.desc, quantified: Object.keys(fx).length > 0 },
-      base, stats, performance, perfDelta, statDelta
+    const natureResult = {
+      id: natDef.id,
+      name: natName,
+      up: natDef.up || '',
+      down: natDef.down || '',
+      modPa: natModPa,
+      modSa: natModSa,
+      modDf: natModDf,
+      modSd: natModSd,
+      modSpd: natModSpd
     };
+
+    const itemResult = def ? {
+      id: def.id,
+      name: def.name,
+      desc: def.desc,
+      quantified: Object.keys(fx).length > 0
+    } : null;
+
+    return {
+      item: itemResult,
+      nature: natureResult,
+      base,
+      stats,
+      performance,
+      perfDelta,
+      statDelta
+    };
+  }
+
+  /**
+   * Calcula estadísticas y rendimiento de un Pokémon con un objeto equipado (y naturaleza opcional).
+   * Mantiene compatibilidad regresiva con Analyzer.Loadout y llamadas existentes.
+   */
+  function applyItem(p, itemId, natureId) {
+    return applyBuild(p, itemId, natureId);
   }
 
   return {
@@ -941,6 +1288,13 @@ Analyzer.DataAdapter = (() => {
     getRegions,
     getItemList,
     applyItem,
+    applyBuild,
+    getAbilitiesData,
+    getTMsData,
+    getNaturesData,
+    getRecommendedNatures,
+    getShopItems: () => (window.G && G.Shop && G.Shop.ITEMS) ? G.Shop.ITEMS : {},
+    getDailyTMs: () => (window.G && G.Shop && G.Shop.dailyTms) ? G.Shop.dailyTms() : [],
     getMetricDefinitions: () => METRIC_DEFINITIONS,
     METRIC_DEFINITIONS
   };
